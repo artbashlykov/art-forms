@@ -50,10 +50,15 @@ class Art_Forms_Plugin {
 	private function load_dependencies() {
 		require_once ART_FORMS_PLUGIN_DIR . 'includes/class-post-types.php';
 		require_once ART_FORMS_PLUGIN_DIR . 'includes/class-settings.php';
+		require_once ART_FORMS_PLUGIN_DIR . 'includes/class-capabilities.php';
 		require_once ART_FORMS_PLUGIN_DIR . 'includes/class-form-settings.php';
 		require_once ART_FORMS_PLUGIN_DIR . 'includes/class-form-actions.php';
 		require_once ART_FORMS_PLUGIN_DIR . 'includes/class-schema.php';
 		require_once ART_FORMS_PLUGIN_DIR . 'includes/class-submissions.php';
+		require_once ART_FORMS_PLUGIN_DIR . 'includes/class-stages.php';
+		require_once ART_FORMS_PLUGIN_DIR . 'includes/class-comments.php';
+		require_once ART_FORMS_PLUGIN_DIR . 'includes/class-activity.php';
+		require_once ART_FORMS_PLUGIN_DIR . 'includes/class-crm-notifications.php';
 		require_once ART_FORMS_PLUGIN_DIR . 'includes/class-delivery-log.php';
 		require_once ART_FORMS_PLUGIN_DIR . 'includes/class-delivery.php';
 		require_once ART_FORMS_PLUGIN_DIR . 'includes/class-delivery-email.php';
@@ -88,6 +93,8 @@ class Art_Forms_Plugin {
 		Art_Forms_Post_Types::register();
 		Art_Forms_Rest::init();
 		Art_Forms_Public::init();
+		Art_Forms_Crm_Notifications::init();
+		Art_Forms_Capabilities::register();
 		Art_Forms_Settings::schedule_cron();
 		add_action( Art_Forms_Settings::CRON_HOOK, array( 'Art_Forms_Settings', 'cleanup_old_submissions' ) );
 	}

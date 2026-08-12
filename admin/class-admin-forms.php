@@ -27,7 +27,7 @@ class Art_Forms_Admin_Forms {
 	 * Forms list page.
 	 */
 	public static function render_list_page() {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! Art_Forms_Capabilities::can_manage() ) {
 			return;
 		}
 
@@ -48,7 +48,7 @@ class Art_Forms_Admin_Forms {
 	 * Edit / new form page.
 	 */
 	public static function render_edit_page() {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! Art_Forms_Capabilities::can_manage() ) {
 			return;
 		}
 
@@ -88,7 +88,7 @@ class Art_Forms_Admin_Forms {
 	 * Save form.
 	 */
 	public static function handle_save() {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! Art_Forms_Capabilities::can_manage() ) {
 			wp_die( esc_html__( 'Недостаточно прав.', 'art-forms' ) );
 		}
 
@@ -154,7 +154,7 @@ class Art_Forms_Admin_Forms {
 	 * Duplicate form.
 	 */
 	public static function handle_duplicate() {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! Art_Forms_Capabilities::can_manage() ) {
 			wp_die( esc_html__( 'Недостаточно прав.', 'art-forms' ) );
 		}
 
@@ -200,7 +200,7 @@ class Art_Forms_Admin_Forms {
 	 * Delete form.
 	 */
 	public static function handle_delete() {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! Art_Forms_Capabilities::can_manage() ) {
 			wp_die( esc_html__( 'Недостаточно прав.', 'art-forms' ) );
 		}
 
@@ -219,7 +219,7 @@ class Art_Forms_Admin_Forms {
 	 * Send test email.
 	 */
 	public static function handle_test_email() {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! Art_Forms_Capabilities::can_manage() ) {
 			wp_die( esc_html__( 'Недостаточно прав.', 'art-forms' ) );
 		}
 
@@ -250,7 +250,7 @@ class Art_Forms_Admin_Forms {
 	 * AJAX code checker.
 	 */
 	public static function ajax_check_code() {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! Art_Forms_Capabilities::can_manage() ) {
 			wp_send_json_error( array( 'message' => __( 'Недостаточно прав.', 'art-forms' ) ), 403 );
 		}
 

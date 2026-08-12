@@ -4,7 +4,7 @@ Tags: forms, quiz, survey, leads, email
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.0.38
+Stable tag: 1.1.30
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -20,7 +20,7 @@ Features:
 * Copy form code and ChatGPT prompt
 * Admin code checker (no storage)
 * Frontend runtime that captures `data-art-form-id` forms
-* Submissions table with UTM and contact fields
+* CRM-style submissions inbox per form (stages, table/board, lead card, comments)
 * After-submit actions: admin email, client email, delayed redirect
 * Email templates with placeholders
 * Delivery log, CSV export, form duplication
@@ -43,6 +43,26 @@ No. You paste the designed HTML/CSS/JS on a page. ART Forms provides the schema,
 Forms with `data-art-form-id` are handled by the ART Forms runtime and posted to the REST endpoint.
 
 == Changelog ==
+
+= 1.1.30 =
+* Fix duplicate Forms list when parent and submenu share the same admin slug.
+* Kanban: load cards per stage column (no silent global 200-card cut).
+* CRM filters: priority and tag; archive stage excluded from “All”.
+* Lead card activity history (stage, fields, star, priority/tags).
+* CSV export includes stage, star, priority, tags and respects current filters.
+* CRM managers, notifications badge/email, field editing, board card reorder.
+
+= 1.1.3 =
+* CRM table: drag-and-drop column reordering (order saved per user).
+
+= 1.1.2 =
+* CRM table: sort by columns (including form fields), resize columns, overflow tooltip on hover.
+
+= 1.1.1 =
+* CRM Answers: hide “Visible columns” panel by default; use full-width layout for the submissions table.
+
+= 1.1.0 =
+* CRM mode for Answers: form hub, per-form stages, table and kanban views, lead modal, comments, contacts tab, bulk actions, column visibility, starred leads.
 
 = 1.0.38 =
 * Fix $wpdb->prepare() argument unpacking for dynamic list queries.

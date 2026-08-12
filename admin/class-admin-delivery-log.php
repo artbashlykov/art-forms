@@ -23,7 +23,7 @@ class Art_Forms_Admin_Delivery_Log {
 	 * Render page.
 	 */
 	public static function render_page() {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! Art_Forms_Capabilities::can_manage() ) {
 			return;
 		}
 

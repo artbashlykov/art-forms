@@ -36,6 +36,9 @@ class Art_Forms_Settings {
 			'rate_limit_window'        => 10,
 			'delivery_fail_notify'     => 1,
 			'delivery_fail_email'      => get_option( 'admin_email', '' ),
+			'crm_notify_enabled'       => 1,
+			'crm_notify_email'         => '',
+			'crm_manager_ids'          => array(),
 		);
 	}
 
@@ -77,10 +80,22 @@ class Art_Forms_Settings {
 		$all['honeypot_enabled']     = ! empty( $all['honeypot_enabled'] ) ? 1 : 0;
 		$all['rate_limit_enabled']   = ! empty( $all['rate_limit_enabled'] ) ? 1 : 0;
 		$all['delivery_fail_notify'] = ! empty( $all['delivery_fail_notify'] ) ? 1 : 0;
+		$all['crm_notify_enabled']   = ! empty( $all['crm_notify_enabled'] ) ? 1 : 0;
 		$all['retention_days']       = absint( $all['retention_days'] );
 		$all['rate_limit_max']       = max( 1, absint( $all['rate_limit_max'] ) );
 		$all['rate_limit_window']    = max( 1, absint( $all['rate_limit_window'] ) );
 		$all['store_payload']        = in_array( $all['store_payload'], array( 'full', 'contacts' ), true ) ? $all['store_payload'] : 'full';
+
+		$mgr = array();
+		if ( ! empty( $all['crm_manager_ids'] ) && is_array( $all['crm_manager_ids'] ) ) {
+			foreach ( $all['crm_manager_ids'] as $uid ) {
+				$uid = absint( $uid );
+				if ( $uid > 0 ) {
+					$mgr[] = $uid;
+				}
+			}
+		}
+		$all['crm_manager_ids'] = array_values( array_unique( $mgr ) );
 
 		return $all;
 	}
@@ -142,6 +157,7 @@ class Art_Forms_Settings {
 		$clean['honeypot_enabled']     = ! empty( $settings['honeypot_enabled'] ) ? 1 : 0;
 		$clean['rate_limit_enabled']   = ! empty( $settings['rate_limit_enabled'] ) ? 1 : 0;
 		$clean['delivery_fail_notify'] = ! empty( $settings['delivery_fail_notify'] ) ? 1 : 0;
+		$clean['crm_notify_enabled']   = ! empty( $settings['crm_notify_enabled'] ) ? 1 : 0;
 
 		if ( isset( $settings['rate_limit_max'] ) ) {
 			$clean['rate_limit_max'] = max( 1, absint( $settings['rate_limit_max'] ) );
@@ -156,7 +172,26 @@ class Art_Forms_Settings {
 			$clean['delivery_fail_email'] = is_email( $email ) ? $email : '';
 		}
 
+		if ( isset( $settings['crm_notify_email'] ) ) {
+			$emails = self::sanitize_email_list( (string) $settings['crm_notify_email'] );
+			$clean['crm_notify_email'] = implode( ', ', $emails );
+		}
+
+		$mgr = array();
+		if ( isset( $settings['crm_manager_ids'] ) && is_array( $settings['crm_manager_ids'] ) ) {
+			foreach ( $settings['crm_manager_ids'] as $uid ) {
+				$uid = absint( $uid );
+				if ( $uid > 0 ) {
+					$mgr[] = $uid;
+				}
+			}
+		}
+		$clean['crm_manager_ids'] = array_values( array_unique( $mgr ) );
+
 		update_option( self::OPTION_KEY, $clean );
+		if ( class_exists( 'Art_Forms_Capabilities' ) ) {
+			Art_Forms_Capabilities::apply_manager_ids( $clean['crm_manager_ids'] );
+		}
 		self::schedule_cron();
 	}
 

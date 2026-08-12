@@ -170,6 +170,66 @@ $tabs = isset( $tabs ) && is_array( $tabs ) ? $tabs : array(
 				</div>
 			</section>
 
+			<section class="art-forms-panel art-forms-collapsible is-collapsed" data-collapse-key="settings-crm-notify">
+				<button type="button" class="art-forms-collapse-toggle" aria-expanded="false">
+					<span class="art-forms-collapse-titles">
+						<span class="art-forms-collapse-title"><?php echo esc_html__( 'Уведомления CRM', 'art-forms' ); ?></span>
+						<span class="art-forms-collapse-hint"><?php echo esc_html__( 'Бейдж в меню и короткое письмо со ссылкой на заявку.', 'art-forms' ); ?></span>
+					</span>
+					<span class="art-forms-collapse-chevron" aria-hidden="true">▸</span>
+				</button>
+				<div class="art-forms-collapse-body">
+					<div class="art-forms-field-block">
+						<label class="art-forms-control-required">
+							<input type="checkbox" name="crm_notify_enabled" value="1" <?php checked( ! empty( $settings['crm_notify_enabled'] ) ); ?> />
+							<?php echo esc_html__( 'Письмо менеджеру о новой заявке (со ссылкой в CRM)', 'art-forms' ); ?>
+						</label>
+						<p class="art-forms-hint"><?php echo esc_html__( 'Бейдж непрочитанных в меню «Ответы» работает всегда. Письмо можно отключить, если хватает уведомлений формы.', 'art-forms' ); ?></p>
+					</div>
+					<div class="art-forms-field-block">
+						<label class="art-forms-label" for="crm_notify_email"><?php echo esc_html__( 'Email для CRM-уведомлений', 'art-forms' ); ?></label>
+						<input type="text" class="art-forms-input" id="crm_notify_email" name="crm_notify_email" value="<?php echo esc_attr( isset( $settings['crm_notify_email'] ) ? $settings['crm_notify_email'] : '' ); ?>" />
+						<p class="art-forms-hint"><?php echo esc_html__( 'Если пусто — берётся «Email по умолчанию», иначе email администратора. Несколько адресов — через запятую.', 'art-forms' ); ?></p>
+					</div>
+					<div class="art-forms-field-block">
+						<span class="art-forms-label"><?php echo esc_html__( 'Менеджеры CRM', 'art-forms' ); ?></span>
+						<p class="art-forms-hint"><?php echo esc_html__( 'Могут открывать «Ответы», смотреть заявки, менять этапы, править поля и оставлять комментарии. Без доступа к формам и настройкам плагина.', 'art-forms' ); ?></p>
+						<?php
+						$manager_ids = isset( $settings['crm_manager_ids'] ) && is_array( $settings['crm_manager_ids'] ) ? $settings['crm_manager_ids'] : array();
+						$users       = get_users(
+							array(
+								'orderby' => 'display_name',
+								'order'   => 'ASC',
+								'number'  => 200,
+								'fields'  => array( 'ID', 'user_login', 'display_name', 'user_email' ),
+							)
+						);
+						?>
+						<div class="art-forms-crm-managers-list">
+							<?php foreach ( $users as $u ) : ?>
+								<?php
+								if ( user_can( $u->ID, 'manage_options' ) || user_can( $u->ID, Art_Forms_Capabilities::CAP_MANAGE ) ) {
+									continue; // Admins already have full access.
+								}
+								?>
+								<label class="art-forms-crm-manager-row">
+									<input type="checkbox" name="crm_manager_ids[]" value="<?php echo esc_attr( (string) $u->ID ); ?>" <?php checked( in_array( (int) $u->ID, array_map( 'intval', $manager_ids ), true ) ); ?> />
+									<?php
+									echo esc_html(
+										sprintf(
+											'%1$s (%2$s)',
+											$u->display_name ? $u->display_name : $u->user_login,
+											$u->user_email
+										)
+									);
+									?>
+								</label>
+							<?php endforeach; ?>
+						</div>
+					</div>
+				</div>
+			</section>
+
 			<section class="art-forms-panel art-forms-collapsible is-collapsed" data-collapse-key="settings-delivery-fail">
 				<button type="button" class="art-forms-collapse-toggle" aria-expanded="false">
 					<span class="art-forms-collapse-titles">

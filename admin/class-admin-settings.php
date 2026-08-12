@@ -51,7 +51,7 @@ class Art_Forms_Admin_Settings {
 	 * Render settings page.
 	 */
 	public static function render_page() {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! Art_Forms_Capabilities::can_manage() ) {
 			return;
 		}
 
@@ -67,7 +67,7 @@ class Art_Forms_Admin_Settings {
 	 * Save settings.
 	 */
 	public static function handle_save() {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! Art_Forms_Capabilities::can_manage() ) {
 			wp_die( esc_html__( 'Недостаточно прав.', 'art-forms' ) );
 		}
 
@@ -88,6 +88,9 @@ class Art_Forms_Admin_Settings {
 				'rate_limit_window'        => isset( $_POST['rate_limit_window'] ) ? absint( wp_unslash( $_POST['rate_limit_window'] ) ) : 10,
 				'delivery_fail_notify'     => ! empty( $_POST['delivery_fail_notify'] ) ? 1 : 0,
 				'delivery_fail_email'      => isset( $_POST['delivery_fail_email'] ) ? wp_unslash( (string) $_POST['delivery_fail_email'] ) : '', // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				'crm_notify_enabled'       => ! empty( $_POST['crm_notify_enabled'] ) ? 1 : 0,
+				'crm_notify_email'         => isset( $_POST['crm_notify_email'] ) ? wp_unslash( (string) $_POST['crm_notify_email'] ) : '', // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				'crm_manager_ids'          => isset( $_POST['crm_manager_ids'] ) ? array_map( 'absint', (array) wp_unslash( $_POST['crm_manager_ids'] ) ) : array(), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			)
 		);
 

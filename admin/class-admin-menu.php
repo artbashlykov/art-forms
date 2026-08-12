@@ -31,30 +31,36 @@ class Art_Forms_Admin_Menu {
 	 * Register top-level menu.
 	 */
 	public static function register_menu() {
+		$cap_crm    = Art_Forms_Capabilities::CAP_CRM;
+		$cap_manage = Art_Forms_Capabilities::CAP_MANAGE;
+
 		add_menu_page(
 			__( 'ART Forms', 'art-forms' ),
 			__( 'ART Forms', 'art-forms' ),
-			'manage_options',
+			$cap_crm,
 			self::MENU_SLUG,
-			array( 'Art_Forms_Admin_Forms', 'render_list_page' ),
+			array( __CLASS__, 'render_top_page' ),
 			'dashicons-feedback',
 			58
 		);
 
+		// Same slug as parent = rename first item to «Формы».
+		// Must use the same callback as the parent (not render_list_page),
+		// otherwise WP can fire both hooks and the list renders twice.
 		add_submenu_page(
 			self::MENU_SLUG,
 			__( 'Формы', 'art-forms' ),
 			__( 'Формы', 'art-forms' ),
-			'manage_options',
+			$cap_manage,
 			self::MENU_SLUG,
-			array( 'Art_Forms_Admin_Forms', 'render_list_page' )
+			array( __CLASS__, 'render_top_page' )
 		);
 
 		add_submenu_page(
 			self::MENU_SLUG,
 			__( 'Добавить форму', 'art-forms' ),
 			__( 'Добавить форму', 'art-forms' ),
-			'manage_options',
+			$cap_manage,
 			'art-forms-new',
 			array( 'Art_Forms_Admin_Forms', 'render_edit_page' )
 		);
@@ -63,7 +69,7 @@ class Art_Forms_Admin_Menu {
 			self::MENU_SLUG,
 			__( 'Ответы', 'art-forms' ),
 			__( 'Ответы', 'art-forms' ),
-			'manage_options',
+			$cap_crm,
 			'art-forms-submissions',
 			array( 'Art_Forms_Admin_Submissions', 'render_page' )
 		);
@@ -72,7 +78,7 @@ class Art_Forms_Admin_Menu {
 			self::MENU_SLUG,
 			__( 'Лог доставок', 'art-forms' ),
 			__( 'Лог доставок', 'art-forms' ),
-			'manage_options',
+			$cap_manage,
 			'art-forms-delivery-log',
 			array( 'Art_Forms_Admin_Delivery_Log', 'render_page' )
 		);
@@ -81,7 +87,7 @@ class Art_Forms_Admin_Menu {
 			self::MENU_SLUG,
 			__( 'Настройки', 'art-forms' ),
 			__( 'Настройки', 'art-forms' ),
-			'manage_options',
+			$cap_manage,
 			'art-forms-settings',
 			array( 'Art_Forms_Admin_Settings', 'render_page' )
 		);
@@ -91,12 +97,32 @@ class Art_Forms_Admin_Menu {
 			self::MENU_SLUG,
 			__( 'Редактировать форму', 'art-forms' ),
 			__( 'Редактировать форму', 'art-forms' ),
-			'manage_options',
+			$cap_manage,
 			'art-forms-edit',
 			array( 'Art_Forms_Admin_Forms', 'render_edit_page' )
 		);
 
 		self::mark_edit_submenu_hidden();
+	}
+
+	/**
+	 * Top-level callback: forms for admins, CRM for managers-only.
+	 *
+	 * Guard: parent + first submenu share slug `art-forms` and both hooks
+	 * may run in one request — render only once.
+	 */
+	public static function render_top_page() {
+		static $done = false;
+		if ( $done ) {
+			return;
+		}
+		$done = true;
+
+		if ( Art_Forms_Capabilities::can_manage() ) {
+			Art_Forms_Admin_Forms::render_list_page();
+			return;
+		}
+		Art_Forms_Admin_Submissions::render_page();
 	}
 
 	/**
