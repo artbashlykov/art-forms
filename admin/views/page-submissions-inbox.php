@@ -149,28 +149,43 @@ if ( ! isset( $tag_filter ) ) {
 			<?php if ( 'leads' === $tab ) : ?>
 				<a class="button" href="<?php echo esc_url( $csv_url ); ?>"><?php echo esc_html__( 'Экспорт CSV', 'art-forms' ); ?></a>
 				<?php if ( 'table' === $layout ) : ?>
+					<?php
+					$popover_col_labels = array(
+						'star'     => '★',
+						'priority' => __( 'Приоритет', 'art-forms' ),
+						'tags'     => __( 'Теги', 'art-forms' ),
+						'id'       => 'ID',
+						'date'     => __( 'Дата', 'art-forms' ),
+						'stage'    => __( 'Этап', 'art-forms' ),
+					);
+					?>
 					<span class="art-forms-crm-columns-wrap">
 						<button type="button" class="button" id="art-forms-crm-columns-btn"><?php echo esc_html__( 'Скрыть поля', 'art-forms' ); ?></button>
 						<div class="art-forms-crm-columns-popover" id="art-forms-crm-columns-popover" hidden>
 							<p><strong><?php echo esc_html__( 'Колонки', 'art-forms' ); ?></strong></p>
-							<p class="art-forms-crm-columns-hint"><?php echo esc_html__( 'Короткое название только в таблице. Ответы из формы не меняются.', 'art-forms' ); ?></p>
-							<?php foreach ( $field_columns as $fc ) : ?>
+							<p class="art-forms-crm-columns-hint"><?php echo esc_html__( 'Снимите галочку, чтобы скрыть колонку. Короткое название — только в таблице.', 'art-forms' ); ?></p>
+							<?php foreach ( $table_col_order as $pkey ) : ?>
 								<?php
-								$fkey     = (string) $fc['key'];
-								$flab_src = isset( $fc['label'] ) && '' !== (string) $fc['label'] ? (string) $fc['label'] : $fkey;
-								$flab     = Art_Forms_Admin_Submissions::field_column_label( $fkey, $flab_src, $col_aliases );
-								$hid      = in_array( $fkey, $hidden, true );
+								$is_field_col = isset( $fields_by_key[ $pkey ] );
+								if ( $is_field_col ) {
+									$fc       = $fields_by_key[ $pkey ];
+									$flab_src = isset( $fc['label'] ) && '' !== (string) $fc['label'] ? (string) $fc['label'] : $pkey;
+								} else {
+									$flab_src = isset( $popover_col_labels[ $pkey ] ) ? $popover_col_labels[ $pkey ] : $pkey;
+								}
+								$flab = Art_Forms_Admin_Submissions::field_column_label( $pkey, $flab_src, $col_aliases );
+								$hid  = in_array( $pkey, $hidden, true );
 								?>
 								<div class="art-forms-crm-col-row">
 									<label class="art-forms-crm-col-vis">
-										<input type="checkbox" class="art-forms-crm-col-toggle" value="<?php echo esc_attr( $fkey ); ?>" <?php checked( ! $hid ); ?> />
+										<input type="checkbox" class="art-forms-crm-col-toggle" value="<?php echo esc_attr( $pkey ); ?>" <?php checked( ! $hid ); ?> />
 										<span class="screen-reader-text"><?php echo esc_html__( 'Показать колонку', 'art-forms' ); ?></span>
 									</label>
 									<input
 										type="text"
 										class="art-forms-crm-col-alias"
 										value="<?php echo esc_attr( $flab ); ?>"
-										data-col="<?php echo esc_attr( $fkey ); ?>"
+										data-col="<?php echo esc_attr( $pkey ); ?>"
 										data-original="<?php echo esc_attr( $flab_src ); ?>"
 										placeholder="<?php echo esc_attr( $flab_src ); ?>"
 										title="<?php echo esc_attr( sprintf( /* translators: %s: original field label */ __( 'Исходное название: %s', 'art-forms' ), $flab_src ) ); ?>"
@@ -451,7 +466,7 @@ if ( ! isset( $tag_filter ) ) {
 							<?php foreach ( $table_col_order as $ck ) : ?>
 								<?php
 								$is_field = isset( $fields_by_key[ $ck ] );
-								$hid      = $is_field && in_array( $ck, $hidden, true );
+								$hid      = in_array( $ck, $hidden, true );
 								if ( $is_field ) {
 									$fc       = $fields_by_key[ $ck ];
 									$flab_src = isset( $fc['label'] ) && '' !== (string) $fc['label'] ? (string) $fc['label'] : $ck;
@@ -460,7 +475,7 @@ if ( ! isset( $tag_filter ) ) {
 									$th_class = 'art-forms-crm-dyn-col art-forms-crm-th art-forms-crm-th-draggable';
 								} else {
 									$flab_src = isset( $col_labels[ $ck ] ) ? $col_labels[ $ck ] : $ck;
-									$flab     = $flab_src;
+									$flab     = Art_Forms_Admin_Submissions::field_column_label( $ck, $flab_src, $col_aliases );
 									$sort     = $ck;
 									$th_class = 'art-forms-crm-th art-forms-crm-th-draggable';
 									if ( 'star' === $ck ) {
@@ -471,7 +486,7 @@ if ( ! isset( $tag_filter ) ) {
 								<th
 									class="<?php echo esc_attr( $th_class ); ?>"
 									data-col="<?php echo esc_attr( $ck ); ?>"
-									<?php echo $is_field ? 'data-original-label="' . esc_attr( $flab_src ) . '"' : ''; ?>
+									data-original-label="<?php echo esc_attr( $flab_src ); ?>"
 									title="<?php echo esc_attr( $flab_src ); ?>"
 									draggable="true"
 									style="width:var(--crm-col-<?php echo esc_attr( $ck ); ?>)"
@@ -497,8 +512,9 @@ if ( ! isset( $tag_filter ) ) {
 										<input type="checkbox" class="art-forms-crm-row-check" value="<?php echo esc_attr( (string) $item['id'] ); ?>" />
 									</td>
 									<?php foreach ( $table_col_order as $ck ) : ?>
+										<?php $cell_hid = in_array( $ck, $hidden, true ); ?>
 										<?php if ( 'star' === $ck ) : ?>
-											<td class="art-forms-crm-col-star" data-col="star">
+											<td class="art-forms-crm-col-star" data-col="star" <?php echo $cell_hid ? 'hidden' : ''; ?>>
 												<button type="button" class="art-forms-crm-star <?php echo ! empty( $item['is_starred'] ) ? 'is-on' : ''; ?>" data-id="<?php echo esc_attr( (string) $item['id'] ); ?>" aria-label="<?php echo esc_attr__( 'Избранное', 'art-forms' ); ?>">★</button>
 											</td>
 										<?php elseif ( 'priority' === $ck ) : ?>
@@ -507,7 +523,7 @@ if ( ! isset( $tag_filter ) ) {
 											$prio_labels = Art_Forms_Submissions::priority_labels();
 											$prio_label  = isset( $prio_labels[ $prio ] ) ? $prio_labels[ $prio ] : $prio_labels[0];
 											?>
-											<td class="art-forms-crm-cell" data-col="priority" data-full="<?php echo esc_attr( $prio_label ); ?>">
+											<td class="art-forms-crm-cell" data-col="priority" data-full="<?php echo esc_attr( $prio_label ); ?>" <?php echo $cell_hid ? 'hidden' : ''; ?>>
 												<span class="art-forms-crm-priority art-forms-crm-priority-<?php echo esc_attr( (string) $prio ); ?> art-forms-crm-cell-text"><?php echo esc_html( $prio_label ); ?></span>
 											</td>
 										<?php elseif ( 'tags' === $ck ) : ?>
@@ -515,19 +531,19 @@ if ( ! isset( $tag_filter ) ) {
 											$item_tags = isset( $item['tags'] ) && is_array( $item['tags'] ) ? $item['tags'] : array();
 											$tags_str  = ! empty( $item_tags ) ? implode( ', ', $item_tags ) : '—';
 											?>
-											<td class="art-forms-crm-cell" data-col="tags" data-full="<?php echo esc_attr( $tags_str ); ?>">
+											<td class="art-forms-crm-cell" data-col="tags" data-full="<?php echo esc_attr( $tags_str ); ?>" <?php echo $cell_hid ? 'hidden' : ''; ?>>
 												<span class="art-forms-crm-cell-text"><?php echo esc_html( $tags_str ); ?></span>
 											</td>
 										<?php elseif ( 'id' === $ck ) : ?>
-											<td class="art-forms-crm-cell" data-col="id" data-full="<?php echo esc_attr( (string) $item['id'] ); ?>">
+											<td class="art-forms-crm-cell" data-col="id" data-full="<?php echo esc_attr( (string) $item['id'] ); ?>" <?php echo $cell_hid ? 'hidden' : ''; ?>>
 												<button type="button" class="button-link art-forms-crm-open-card" data-id="<?php echo esc_attr( (string) $item['id'] ); ?>"><?php echo esc_html( (string) $item['id'] ); ?></button>
 											</td>
 										<?php elseif ( 'date' === $ck ) : ?>
-											<td class="art-forms-crm-cell" data-col="date" data-full="<?php echo esc_attr( Art_Forms_Submissions::format_datetime( (string) $item['created_at'] ) ); ?>">
+											<td class="art-forms-crm-cell" data-col="date" data-full="<?php echo esc_attr( Art_Forms_Submissions::format_datetime( (string) $item['created_at'] ) ); ?>" <?php echo $cell_hid ? 'hidden' : ''; ?>>
 												<span class="art-forms-crm-cell-text"><?php echo esc_html( Art_Forms_Submissions::format_datetime( (string) $item['created_at'] ) ); ?></span>
 											</td>
 										<?php elseif ( 'stage' === $ck ) : ?>
-											<td class="art-forms-crm-cell" data-col="stage" data-full="<?php echo esc_attr( $st ? (string) $st['title'] : '—' ); ?>">
+											<td class="art-forms-crm-cell" data-col="stage" data-full="<?php echo esc_attr( $st ? (string) $st['title'] : '—' ); ?>" <?php echo $cell_hid ? 'hidden' : ''; ?>>
 												<?php if ( $st ) : ?>
 													<span class="art-forms-crm-stage-pill art-forms-crm-cell-text" style="--stage-color:<?php echo esc_attr( $st['color'] ); ?>"><?php echo esc_html( $st['title'] ); ?></span>
 												<?php else : ?>
@@ -537,11 +553,10 @@ if ( ! isset( $tag_filter ) ) {
 										<?php elseif ( isset( $fields_by_key[ $ck ] ) ) : ?>
 											<?php
 											$fc   = $fields_by_key[ $ck ];
-											$hid  = in_array( $ck, $hidden, true );
 											$raw  = isset( $item['payload'][ $ck ] ) ? $item['payload'][ $ck ] : '';
 											$disp = Art_Forms_Schema::format_display_value( $fc, $raw );
 											?>
-											<td class="art-forms-crm-dyn-col art-forms-crm-cell" data-col="<?php echo esc_attr( $ck ); ?>" data-full="<?php echo esc_attr( $disp ); ?>" <?php echo $hid ? 'hidden' : ''; ?>>
+											<td class="art-forms-crm-dyn-col art-forms-crm-cell" data-col="<?php echo esc_attr( $ck ); ?>" data-full="<?php echo esc_attr( $disp ); ?>" <?php echo $cell_hid ? 'hidden' : ''; ?>>
 												<span class="art-forms-crm-cell-text"><?php echo esc_html( $disp ); ?></span>
 											</td>
 										<?php endif; ?>

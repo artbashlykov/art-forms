@@ -4,7 +4,7 @@ Tags: forms, quiz, survey, leads, email
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.1.30
+Stable tag: 1.1.31
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -43,6 +43,9 @@ No. You paste the designed HTML/CSS/JS on a page. ART Forms provides the schema,
 Forms with `data-art-form-id` are handled by the ART Forms runtime and posted to the REST endpoint.
 
 == Changelog ==
+
+= 1.1.31 =
+* CRM “Hide columns”: include all table columns (star, priority, tags, ID, date, stage, and form fields).
 
 = 1.1.30 =
 * Fix duplicate Forms list when parent and submenu share the same admin slug.

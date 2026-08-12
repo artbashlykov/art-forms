@@ -909,7 +909,7 @@
 			cb.addEventListener('change', function () {
 				var key = cb.value;
 				var show = cb.checked;
-				root.querySelectorAll('.art-forms-crm-dyn-col[data-col="' + key + '"]').forEach(
+				root.querySelectorAll('#art-forms-crm-table [data-col="' + key + '"]').forEach(
 					function (cell) {
 						cell.hidden = !show;
 					}
