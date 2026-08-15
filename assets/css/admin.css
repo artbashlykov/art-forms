@@ -62,7 +62,7 @@
 
 .art-forms-page-head {
 	display: flex;
-	align-items: flex-start;
+	align-items: flex-end;
 	justify-content: space-between;
 	gap: 16px;
 	margin: 8px 0 10px;
@@ -481,6 +481,13 @@
 	text-overflow: ellipsis;
 	white-space: nowrap;
 	max-width: 280px;
+}
+
+.art-forms-field-summary-label.is-consent {
+	white-space: normal;
+	max-width: min(42em, 100%);
+	font-weight: 500;
+	line-height: 1.35;
 }
 
 .art-forms-field-summary-key {
@@ -1071,6 +1078,98 @@
 .art-forms-row-actions .art-forms-field-icon-btn:focus {
 	box-shadow: 0 0 0 1px #2271b1;
 	outline: none;
+}
+
+.art-forms-list-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 12px;
+	margin: 8px 0 0;
+}
+
+.art-forms-list-head h1 {
+	margin: 0;
+	padding: 0;
+	line-height: 1.3;
+}
+
+.art-forms-list-head .page-title-action {
+	position: static;
+	top: auto;
+	margin: 0;
+}
+
+.art-forms-list-head .page-title-action:active,
+.art-forms-list-head .page-title-action:focus {
+	top: auto;
+}
+
+.art-forms-import-form {
+	display: inline-flex;
+	align-items: center;
+	position: relative;
+	margin: 0 0 0 auto;
+}
+
+.art-forms-import-file {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	border: 0;
+}
+
+.art-forms-import-file:focus {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	clip: rect(0, 0, 0, 0);
+	left: 0;
+	top: 0;
+}
+
+.art-forms-list-head .art-forms-import-btn {
+	background: #fff;
+	border-color: #00a32a;
+	color: #00a32a;
+	cursor: pointer;
+	top: auto;
+}
+
+.art-forms-list-head .art-forms-import-btn:hover,
+.art-forms-list-head .art-forms-import-btn:focus,
+.art-forms-list-head .art-forms-import-btn:active {
+	background: #00a32a;
+	border-color: #00a32a;
+	color: #fff;
+	box-shadow: none;
+	top: auto;
+	outline: none;
+}
+
+.art-forms-import-hint {
+	margin: 10px 0 16px;
+	max-width: 72em;
+}
+
+.art-forms-import-notice ul {
+	margin: 8px 0 0 1.2em;
+}
+
+.art-forms-page-head-actions {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-shrink: 0;
+	padding-bottom: 2px;
+}
+
+.art-forms-page-head-actions .art-forms-id-badge {
+	margin-top: 0;
 }
 
 @media (max-width: 960px) {
@@ -1882,6 +1981,21 @@ body.art-forms-crm-modal-open {
 	letter-spacing: 0.03em;
 	color: #646970;
 	margin: 0 0 4px;
+}
+
+.art-forms-crm-fields-list .is-consent dt {
+	text-transform: none;
+	letter-spacing: 0;
+	font-size: 13px;
+	font-weight: 600;
+	color: #1d2327;
+	line-height: 1.4;
+	white-space: normal;
+}
+
+.art-forms-crm-consent-doc {
+	margin-left: 6px;
+	font-size: 12px;
 }
 
 .art-forms-crm-fields-list dd {

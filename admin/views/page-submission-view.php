@@ -32,6 +32,7 @@ defined( 'ABSPATH' ) || exit;
 			<p><strong><?php echo esc_html__( 'Форма', 'art-forms' ); ?>:</strong> <?php echo esc_html( $submission['form_id'] ? (string) get_the_title( $submission['form_id'] ) : '—' ); ?> (<?php echo esc_html( (string) $submission['form_id'] ); ?>)</p>
 			<p><strong><?php echo esc_html__( 'Дата (UTC)', 'art-forms' ); ?>:</strong> <?php echo esc_html( Art_Forms_Submissions::format_datetime( (string) $submission['created_at'] ) ); ?></p>
 			<p><strong><?php echo esc_html__( 'Статус', 'art-forms' ); ?>:</strong> <?php echo wp_kses_post( Art_Forms_Submissions::render_status_badge( (string) $submission['status'] ) ); ?></p>
+			<p><strong><?php echo esc_html__( 'Имя', 'art-forms' ); ?>:</strong> <?php echo esc_html( isset( $submission['contact_name'] ) ? (string) $submission['contact_name'] : '' ); ?></p>
 			<p><strong>Email:</strong> <?php echo esc_html( $submission['contact_email'] ); ?></p>
 			<p><strong><?php echo esc_html__( 'Телефон', 'art-forms' ); ?>:</strong> <?php echo esc_html( $submission['contact_phone'] ); ?></p>
 			<p><strong>URL:</strong> <?php echo esc_html( Art_Forms_Schema::format_display_url( (string) $submission['page_url'] ) ); ?></p>
@@ -76,7 +77,7 @@ defined( 'ABSPATH' ) || exit;
 						<?php
 						$key   = (string) $key;
 						$field = isset( $fields_map[ $key ] ) ? $fields_map[ $key ] : array( 'key' => $key, 'label' => $key, 'type' => 'text' );
-						$label = isset( $field['label'] ) && '' !== (string) $field['label'] ? (string) $field['label'] : $key;
+						$label = Art_Forms_Schema::field_display_label( $field );
 						?>
 						<tr>
 							<th>

@@ -100,11 +100,13 @@ class Art_Forms_Admin_Submissions {
 					'addComment'      => __( 'Добавить', 'art-forms' ),
 					'related'         => __( 'Заявки контакта', 'art-forms' ),
 					'profile'         => __( 'профиль', 'art-forms' ),
+					'consentDoc'      => __( 'документ', 'art-forms' ),
 					'edit'            => __( 'Редактировать', 'art-forms' ),
 					'saveFields'      => __( 'Сохранить', 'art-forms' ),
 					'cancel'          => __( 'Отмена', 'art-forms' ),
 					'fieldsSaved'     => __( 'Поля сохранены', 'art-forms' ),
 					'invalidEmail'    => __( 'Некорректный email', 'art-forms' ),
+					'name'            => __( 'Имя', 'art-forms' ),
 					'priority'        => __( 'Приоритет', 'art-forms' ),
 					'tags'            => __( 'Теги', 'art-forms' ),
 					'tagsHint'        => __( 'через запятую', 'art-forms' ),
@@ -154,7 +156,7 @@ class Art_Forms_Admin_Submissions {
 			$tag_filter = substr( $tag_filter, 0, 40 );
 		}
 
-		$allowed_orderby = array( 'id', 'form', 'date', 'email', 'phone', 'status', 'stage', 'star', 'priority' );
+		$allowed_orderby = array( 'id', 'form', 'date', 'email', 'phone', 'name', 'status', 'stage', 'star', 'priority' );
 		$is_field_order  = ( 0 === strpos( $orderby, 'field_' ) );
 		if ( ! in_array( $orderby, $allowed_orderby, true ) && ! $is_field_order ) {
 			$orderby = 'id';
@@ -216,7 +218,7 @@ class Art_Forms_Admin_Submissions {
 		foreach ( $fields as $field ) {
 			$type = isset( $field['type'] ) ? $field['type'] : 'text';
 			$key  = isset( $field['key'] ) ? $field['key'] : '';
-			if ( '' === $key || 'hidden' === $type ) {
+			if ( '' === $key || 'hidden' === $type || 'name' === $type ) {
 				continue;
 			}
 			$field_columns[] = $field;
@@ -457,12 +459,20 @@ class Art_Forms_Admin_Submissions {
 	 */
 	public static function resolve_column_order( array $saved_order, array $field_keys ) {
 		$default = array_merge(
-			array( 'star', 'priority', 'tags', 'id', 'date' ),
+			array( 'star', 'priority', 'tags', 'id', 'name', 'date' ),
 			$field_keys,
 			array( 'stage' )
 		);
 		$allowed = array_fill_keys( $default, true );
 		$out     = array();
+
+		$had_name = false;
+		foreach ( $saved_order as $col ) {
+			if ( 'name' === sanitize_key( (string) $col ) ) {
+				$had_name = true;
+				break;
+			}
+		}
 
 		foreach ( $saved_order as $col ) {
 			$col = sanitize_key( (string) $col );
@@ -476,9 +486,17 @@ class Art_Forms_Admin_Submissions {
 		}
 
 		foreach ( $default as $col ) {
-			if ( ! in_array( $col, $out, true ) ) {
-				$out[] = $col;
+			if ( in_array( $col, $out, true ) ) {
+				continue;
 			}
+			if ( 'name' === $col && ! $had_name ) {
+				$id_pos = array_search( 'id', $out, true );
+				if ( false !== $id_pos ) {
+					array_splice( $out, $id_pos + 1, 0, array( 'name' ) );
+					continue;
+				}
+			}
+			$out[] = $col;
 		}
 
 		return $out;
@@ -538,7 +556,7 @@ class Art_Forms_Admin_Submissions {
 			if ( 'hidden' === $type ) {
 				continue;
 			}
-			$label   = isset( $field['label'] ) && '' !== (string) $field['label'] ? (string) $field['label'] : $key;
+			$label   = Art_Forms_Schema::field_display_label( $field );
 			$options = array();
 			if ( ! empty( $field['options'] ) && is_array( $field['options'] ) ) {
 				foreach ( $field['options'] as $opt ) {
@@ -550,12 +568,14 @@ class Art_Forms_Admin_Submissions {
 				}
 			}
 			$fields_out[] = array(
-				'key'     => $key,
-				'label'   => $label,
-				'type'    => $type,
-				'value'   => Art_Forms_Schema::format_display_value( $field, $value ),
-				'raw'     => $value,
-				'options' => $options,
+				'key'               => $key,
+				'label'             => $label,
+				'type'              => $type,
+				'value'             => Art_Forms_Schema::format_display_value( $field, $value ),
+				'raw'               => $value,
+				'options'           => $options,
+				'privacy_url'       => ( 'consent' === $type ) ? Art_Forms_Schema::resolve_privacy_url( $field ) : '',
+				'privacy_link_text' => ( 'consent' === $type && ! empty( $field['privacy_link_text'] ) ) ? (string) $field['privacy_link_text'] : '',
 			);
 		}
 
@@ -623,6 +643,7 @@ class Art_Forms_Admin_Submissions {
 				'status_badge'   => Art_Forms_Submissions::render_status_badge( (string) $submission['status'] ),
 				'contact_email'  => (string) $submission['contact_email'],
 				'contact_phone'  => (string) $submission['contact_phone'],
+				'contact_name'   => isset( $submission['contact_name'] ) ? (string) $submission['contact_name'] : '',
 				'profile_url'    => $profile_url,
 				'priority'       => (int) $submission['priority'],
 				'priority_label' => Art_Forms_Submissions::priority_labels()[ (int) $submission['priority'] ] ?? '',
@@ -668,6 +689,9 @@ class Art_Forms_Admin_Submissions {
 		}
 		if ( isset( $_POST['contact_phone'] ) ) {
 			$data['contact_phone'] = sanitize_text_field( wp_unslash( (string) $_POST['contact_phone'] ) );
+		}
+		if ( isset( $_POST['contact_name'] ) ) {
+			$data['contact_name'] = sanitize_text_field( wp_unslash( (string) $_POST['contact_name'] ) );
 		}
 
 		$payload_raw = isset( $_POST['payload'] ) ? wp_unslash( $_POST['payload'] ) : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized

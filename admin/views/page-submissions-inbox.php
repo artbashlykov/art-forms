@@ -155,6 +155,7 @@ if ( ! isset( $tag_filter ) ) {
 						'priority' => __( 'Приоритет', 'art-forms' ),
 						'tags'     => __( 'Теги', 'art-forms' ),
 						'id'       => 'ID',
+						'name'     => __( 'Имя', 'art-forms' ),
 						'date'     => __( 'Дата', 'art-forms' ),
 						'stage'    => __( 'Этап', 'art-forms' ),
 					);
@@ -169,7 +170,7 @@ if ( ! isset( $tag_filter ) ) {
 								$is_field_col = isset( $fields_by_key[ $pkey ] );
 								if ( $is_field_col ) {
 									$fc       = $fields_by_key[ $pkey ];
-									$flab_src = isset( $fc['label'] ) && '' !== (string) $fc['label'] ? (string) $fc['label'] : $pkey;
+									$flab_src = Art_Forms_Schema::field_display_label( $fc );
 								} else {
 									$flab_src = isset( $popover_col_labels[ $pkey ] ) ? $popover_col_labels[ $pkey ] : $pkey;
 								}
@@ -258,6 +259,7 @@ if ( ! isset( $tag_filter ) ) {
 			<table class="widefat striped art-forms-crm-contacts-table">
 				<thead>
 					<tr>
+						<th><?php echo esc_html__( 'Имя', 'art-forms' ); ?></th>
 						<th><?php echo esc_html__( 'Email', 'art-forms' ); ?></th>
 						<th><?php echo esc_html__( 'Телефон', 'art-forms' ); ?></th>
 						<th><?php echo esc_html__( 'Заявок', 'art-forms' ); ?></th>
@@ -267,10 +269,11 @@ if ( ! isset( $tag_filter ) ) {
 				</thead>
 				<tbody>
 					<?php if ( empty( $contacts ) ) : ?>
-						<tr><td colspan="5"><?php echo esc_html__( 'Контактов пока нет.', 'art-forms' ); ?></td></tr>
+						<tr><td colspan="6"><?php echo esc_html__( 'Контактов пока нет.', 'art-forms' ); ?></td></tr>
 					<?php else : ?>
 						<?php foreach ( $contacts as $c ) : ?>
 							<tr>
+								<td><?php echo esc_html( ! empty( $c['contact_name'] ) ? $c['contact_name'] : '—' ); ?></td>
 								<td><?php echo esc_html( $c['contact_email'] ? $c['contact_email'] : '—' ); ?></td>
 								<td><?php echo esc_html( $c['contact_phone'] ? $c['contact_phone'] : '—' ); ?></td>
 								<td><?php echo esc_html( (string) $c['submissions_count'] ); ?></td>
@@ -428,6 +431,7 @@ if ( ! isset( $tag_filter ) ) {
 					'priority' => 90,
 					'tags'     => 140,
 					'id'       => 70,
+					'name'     => 160,
 					'date'     => 130,
 					'stage'    => 120,
 				);
@@ -446,6 +450,7 @@ if ( ! isset( $tag_filter ) ) {
 					'priority' => __( 'Приоритет', 'art-forms' ),
 					'tags'     => __( 'Теги', 'art-forms' ),
 					'id'       => 'ID',
+					'name'     => __( 'Имя', 'art-forms' ),
 					'date'     => __( 'Дата', 'art-forms' ),
 					'stage'    => __( 'Этап', 'art-forms' ),
 				);
@@ -469,7 +474,7 @@ if ( ! isset( $tag_filter ) ) {
 								$hid      = in_array( $ck, $hidden, true );
 								if ( $is_field ) {
 									$fc       = $fields_by_key[ $ck ];
-									$flab_src = isset( $fc['label'] ) && '' !== (string) $fc['label'] ? (string) $fc['label'] : $ck;
+									$flab_src = Art_Forms_Schema::field_display_label( $fc );
 									$flab     = Art_Forms_Admin_Submissions::field_column_label( $ck, $flab_src, $col_aliases );
 									$sort     = 'field_' . $ck;
 									$th_class = 'art-forms-crm-dyn-col art-forms-crm-th art-forms-crm-th-draggable';
@@ -537,6 +542,14 @@ if ( ! isset( $tag_filter ) ) {
 										<?php elseif ( 'id' === $ck ) : ?>
 											<td class="art-forms-crm-cell" data-col="id" data-full="<?php echo esc_attr( (string) $item['id'] ); ?>" <?php echo $cell_hid ? 'hidden' : ''; ?>>
 												<button type="button" class="button-link art-forms-crm-open-card" data-id="<?php echo esc_attr( (string) $item['id'] ); ?>"><?php echo esc_html( (string) $item['id'] ); ?></button>
+											</td>
+										<?php elseif ( 'name' === $ck ) : ?>
+											<?php
+											$cname = isset( $item['contact_name'] ) ? trim( (string) $item['contact_name'] ) : '';
+											$cname_disp = '' !== $cname ? $cname : '—';
+											?>
+											<td class="art-forms-crm-cell" data-col="name" data-full="<?php echo esc_attr( $cname ); ?>" <?php echo $cell_hid ? 'hidden' : ''; ?>>
+												<span class="art-forms-crm-cell-text"><?php echo esc_html( $cname_disp ); ?></span>
 											</td>
 										<?php elseif ( 'date' === $ck ) : ?>
 											<td class="art-forms-crm-cell" data-col="date" data-full="<?php echo esc_attr( Art_Forms_Submissions::format_datetime( (string) $item['created_at'] ) ); ?>" <?php echo $cell_hid ? 'hidden' : ''; ?>>
@@ -614,7 +627,9 @@ if ( ! isset( $tag_filter ) ) {
 						<div class="art-forms-crm-board-cards" data-stage-id="<?php echo esc_attr( (string) $sid ); ?>">
 							<?php foreach ( $cards as $item ) : ?>
 								<?php
-								$preview = $item['contact_email'] ? $item['contact_email'] : $item['contact_phone'];
+								$preview = ! empty( $item['contact_name'] )
+									? $item['contact_name']
+									: ( $item['contact_email'] ? $item['contact_email'] : $item['contact_phone'] );
 								if ( ! $preview && ! empty( $field_columns[0] ) ) {
 									$fk = $field_columns[0]['key'];
 									$preview = isset( $item['payload'][ $fk ] ) ? Art_Forms_Schema::format_display_value( $field_columns[0], $item['payload'][ $fk ] ) : '';
@@ -628,6 +643,7 @@ if ( ! isset( $tag_filter ) ) {
 									draggable="true"
 									data-id="<?php echo esc_attr( (string) $item['id'] ); ?>"
 									data-stage-id="<?php echo esc_attr( (string) $item['stage_id'] ); ?>"
+									data-full="<?php echo esc_attr( trim( ( isset( $item['contact_name'] ) ? (string) $item['contact_name'] : '' ) . ' ' . (string) $item['contact_email'] . ' ' . (string) $item['contact_phone'] ) ); ?>"
 								>
 									<button type="button" class="art-forms-crm-star <?php echo ! empty( $item['is_starred'] ) ? 'is-on' : ''; ?>" data-id="<?php echo esc_attr( (string) $item['id'] ); ?>">★</button>
 									<button type="button" class="art-forms-crm-board-card-open art-forms-crm-open-card" data-id="<?php echo esc_attr( (string) $item['id'] ); ?>">

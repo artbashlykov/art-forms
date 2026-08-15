@@ -12,12 +12,15 @@
  * @var string               $prompt
  * @var string               $notice
  * @var bool                 $just_saved
+ * @var array<string,mixed>|null $import_notice
  */
 
 defined( 'ABSPATH' ) || exit;
 
-$field_types = Art_Forms_Schema::FIELD_TYPES;
-$just_saved  = ! empty( $just_saved );
+$field_types    = Art_Forms_Schema::FIELD_TYPES;
+$just_saved     = ! empty( $just_saved );
+$import_notice  = isset( $import_notice ) && is_array( $import_notice ) ? $import_notice : null;
+$export_url     = $form_id ? wp_nonce_url( admin_url( 'admin-post.php?action=art_forms_export_form&form_id=' . $form_id ), 'art_forms_export_form' ) : '';
 ?>
 <div class="wrap art-forms-admin art-forms-edit">
 	<div class="art-forms-page-head">
@@ -26,9 +29,25 @@ $just_saved  = ! empty( $just_saved );
 			<h1><?php echo $form_id ? esc_html__( 'Редактировать форму', 'art-forms' ) : esc_html__( 'Новая форма', 'art-forms' ); ?></h1>
 		</div>
 		<?php if ( $form_id ) : ?>
-			<span class="art-forms-id-badge"><?php echo esc_html( sprintf( /* translators: %d: form id */ __( 'ID %d', 'art-forms' ), $form_id ) ); ?></span>
+			<div class="art-forms-page-head-actions">
+				<a class="button" href="<?php echo esc_url( $export_url ); ?>"><?php echo esc_html__( 'Экспортировать', 'art-forms' ); ?></a>
+				<span class="art-forms-id-badge"><?php echo esc_html( sprintf( /* translators: %d: form id */ __( 'ID %d', 'art-forms' ), $form_id ) ); ?></span>
+			</div>
 		<?php endif; ?>
 	</div>
+
+	<?php if ( $import_notice ) : ?>
+		<div class="notice notice-warning is-dismissible art-forms-import-notice">
+			<p><strong><?php echo esc_html__( 'Форма импортирована. Проверьте пункты ниже — они часто ломаются при переносе между сайтами.', 'art-forms' ); ?></strong></p>
+			<?php if ( ! empty( $import_notice['warnings'] ) && is_array( $import_notice['warnings'] ) ) : ?>
+				<ul>
+					<?php foreach ( $import_notice['warnings'] as $warning ) : ?>
+						<li><?php echo esc_html( (string) $warning ); ?></li>
+					<?php endforeach; ?>
+				</ul>
+			<?php endif; ?>
+		</div>
+	<?php endif; ?>
 
 	<?php if ( $notice ) : ?>
 		<div class="notice notice-success is-dismissible"><p><?php echo esc_html( $notice ); ?></p></div>

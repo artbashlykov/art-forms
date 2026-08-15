@@ -70,6 +70,7 @@ class Art_Forms_Activator {
 			ip varchar(45) NOT NULL DEFAULT '',
 			contact_email varchar(190) NOT NULL DEFAULT '',
 			contact_phone varchar(50) NOT NULL DEFAULT '',
+			contact_name varchar(190) NOT NULL DEFAULT '',
 			page_url text NULL,
 			referrer text NULL,
 			utm_source varchar(191) NOT NULL DEFAULT '',

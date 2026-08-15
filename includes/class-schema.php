@@ -16,6 +16,7 @@ class Art_Forms_Schema {
 
 	const FIELD_TYPES = array(
 		'text',
+		'name',
 		'email',
 		'tel',
 		'textarea',
@@ -476,6 +477,45 @@ class Art_Forms_Schema {
 	 */
 	public static function honeypot_name( $form_id ) {
 		return 'art_forms_hp_' . absint( $form_id );
+	}
+
+	/**
+	 * Full human-readable label (consent includes link text).
+	 *
+	 * @param array<string, mixed> $field Field.
+	 * @return string
+	 */
+	public static function field_display_label( array $field ) {
+		$key   = isset( $field['key'] ) ? (string) $field['key'] : '';
+		$label = isset( $field['label'] ) ? trim( (string) $field['label'] ) : '';
+		if ( '' === $label ) {
+			$label = $key;
+		}
+
+		$type = isset( $field['type'] ) ? (string) $field['type'] : 'text';
+		if ( 'consent' !== $type ) {
+			return $label;
+		}
+
+		$link_text = isset( $field['privacy_link_text'] ) ? trim( (string) $field['privacy_link_text'] ) : '';
+		$url       = self::resolve_privacy_url( $field );
+		if ( '' === $link_text && '' !== $url ) {
+			$link_text = __( 'политикой конфиденциальности', 'art-forms' );
+		}
+		if ( '' === $link_text ) {
+			return $label;
+		}
+
+		if ( function_exists( 'mb_stripos' ) ) {
+			$already = false !== mb_stripos( $label, $link_text, 0, 'UTF-8' );
+		} else {
+			$already = false !== stripos( $label, $link_text );
+		}
+		if ( $already ) {
+			return $label;
+		}
+
+		return trim( $label . ' ' . $link_text );
 	}
 
 	/**

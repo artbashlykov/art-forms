@@ -19,6 +19,8 @@ class Art_Forms_Admin_Forms {
 		add_action( 'admin_post_art_forms_save_form', array( __CLASS__, 'handle_save' ) );
 		add_action( 'admin_post_art_forms_duplicate_form', array( __CLASS__, 'handle_duplicate' ) );
 		add_action( 'admin_post_art_forms_delete_form', array( __CLASS__, 'handle_delete' ) );
+		add_action( 'admin_post_art_forms_export_form', array( __CLASS__, 'handle_export' ) );
+		add_action( 'admin_post_art_forms_import_form', array( __CLASS__, 'handle_import' ) );
 		add_action( 'admin_post_art_forms_test_email', array( __CLASS__, 'handle_test_email' ) );
 		add_action( 'wp_ajax_art_forms_check_code', array( __CLASS__, 'ajax_check_code' ) );
 	}
@@ -40,6 +42,12 @@ class Art_Forms_Admin_Forms {
 				'order'          => 'DESC',
 			)
 		);
+
+		$import_error  = Art_Forms_Form_Pack::consume_error();
+		$import_notice = null;
+		if ( isset( $_GET['imported'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$import_notice = Art_Forms_Form_Pack::consume_notice();
+		}
 
 		include ART_FORMS_PLUGIN_DIR . 'admin/views/page-forms-list.php';
 	}
@@ -79,6 +87,11 @@ class Art_Forms_Admin_Forms {
 		}
 		if ( isset( $_GET['tested'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$notice = __( 'Тестовое письмо отправлено (см. лог доставок).', 'art-forms' );
+		}
+
+		$import_notice = null;
+		if ( isset( $_GET['imported'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$import_notice = Art_Forms_Form_Pack::consume_notice();
 		}
 
 		include ART_FORMS_PLUGIN_DIR . 'admin/views/page-form-edit.php';
@@ -212,6 +225,60 @@ class Art_Forms_Admin_Forms {
 		}
 
 		wp_safe_redirect( admin_url( 'admin.php?page=art-forms' ) );
+		exit;
+	}
+
+	/**
+	 * Download form pack JSON.
+	 */
+	public static function handle_export() {
+		if ( ! Art_Forms_Capabilities::can_manage() ) {
+			wp_die( esc_html__( 'Недостаточно прав.', 'art-forms' ) );
+		}
+
+		check_admin_referer( 'art_forms_export_form' );
+
+		$form_id = isset( $_GET['form_id'] ) ? absint( wp_unslash( $_GET['form_id'] ) ) : 0;
+		Art_Forms_Form_Pack::send_download( $form_id );
+	}
+
+	/**
+	 * Import form pack JSON.
+	 */
+	public static function handle_import() {
+		if ( ! Art_Forms_Capabilities::can_manage() ) {
+			wp_die( esc_html__( 'Недостаточно прав.', 'art-forms' ) );
+		}
+
+		check_admin_referer( 'art_forms_import_form' );
+
+		$file = isset( $_FILES['art_forms_pack'] ) && is_array( $_FILES['art_forms_pack'] ) ? $_FILES['art_forms_pack'] : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- parsed below.
+		$pack = Art_Forms_Form_Pack::parse_upload( $file );
+		if ( is_wp_error( $pack ) ) {
+			Art_Forms_Form_Pack::store_error( $pack->get_error_message() );
+			wp_safe_redirect( admin_url( 'admin.php?page=art-forms&import_error=1' ) );
+			exit;
+		}
+
+		$result = Art_Forms_Form_Pack::import_pack( $pack );
+		if ( is_wp_error( $result ) ) {
+			Art_Forms_Form_Pack::store_error( $result->get_error_message() );
+			wp_safe_redirect( admin_url( 'admin.php?page=art-forms&import_error=1' ) );
+			exit;
+		}
+
+		Art_Forms_Form_Pack::store_notice( $result );
+
+		wp_safe_redirect(
+			add_query_arg(
+				array(
+					'page'     => 'art-forms-edit',
+					'form_id'  => (int) $result['form_id'],
+					'imported' => 1,
+				),
+				admin_url( 'admin.php' )
+			)
+		);
 		exit;
 	}
 

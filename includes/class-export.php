@@ -166,6 +166,9 @@ class Art_Forms_Export {
 				}
 				$lines[] = '      <label><input type="checkbox" id="art-forms-' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" value="1"' . $req_attr . ' /> ' . $consent_label . '</label>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above
 				break;
+			case 'name':
+				$lines[] = '      <input type="text" id="art-forms-' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" autocomplete="name"' . $req_attr . ' />';
+				break;
 			case 'email':
 			case 'tel':
 			case 'text':

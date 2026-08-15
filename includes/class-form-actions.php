@@ -173,6 +173,33 @@ class Art_Forms_Form_Actions {
 	}
 
 	/**
+	 * Recipients of the form’s “email to admin” action (empty if action is off).
+	 *
+	 * @param int $form_id Form ID.
+	 * @return array<int, string>
+	 */
+	public static function admin_email_recipients( $form_id ) {
+		$form_id  = absint( $form_id );
+		$settings = Art_Forms_Form_Settings::get( $form_id );
+		$action   = self::get_action( $settings, 'email_admin' );
+		if ( ! $action ) {
+			return array();
+		}
+
+		$to_list = Art_Forms_Settings::sanitize_email_list( isset( $action['email_to'] ) ? (string) $action['email_to'] : '' );
+		if ( empty( $to_list ) ) {
+			$to_list = Art_Forms_Settings::sanitize_email_list( (string) Art_Forms_Settings::get( 'default_email_to', '' ) );
+		}
+
+		$normalized = array();
+		foreach ( $to_list as $email ) {
+			$normalized[] = strtolower( $email );
+		}
+
+		return array_values( array_unique( $normalized ) );
+	}
+
+	/**
 	 * Redirect URL from actions (empty if none).
 	 *
 	 * @param array<string, mixed> $settings Settings.
@@ -217,7 +244,7 @@ class Art_Forms_Form_Actions {
 		$label = $defs[ $type ]['label'];
 		$hint  = $defs[ $type ]['hint'];
 		$idx   = ( '__i__' === $index ) ? '__i__' : (string) absint( $index );
-		$ph    = __( 'Плейсхолдеры: {form_title}, {submission_id}, {email}, {phone}, {all_fields}, {page_url}, {field:key}', 'art-forms' );
+		$ph    = __( 'Плейсхолдеры: {form_title}, {submission_id}, {name}, {email}, {phone}, {all_fields}, {page_url}, {crm_link}, {field:key}', 'art-forms' );
 		?>
 		<div class="art-forms-action-card art-forms-collapsible" data-action-type="<?php echo esc_attr( $type ); ?>">
 			<input type="hidden" name="actions[<?php echo esc_attr( $idx ); ?>][type]" value="<?php echo esc_attr( $type ); ?>" />

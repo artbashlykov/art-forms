@@ -63,6 +63,7 @@ class Art_Forms_Plugin {
 		require_once ART_FORMS_PLUGIN_DIR . 'includes/class-delivery.php';
 		require_once ART_FORMS_PLUGIN_DIR . 'includes/class-delivery-email.php';
 		require_once ART_FORMS_PLUGIN_DIR . 'includes/class-export.php';
+		require_once ART_FORMS_PLUGIN_DIR . 'includes/class-form-pack.php';
 		require_once ART_FORMS_PLUGIN_DIR . 'includes/class-code-checker.php';
 		require_once ART_FORMS_PLUGIN_DIR . 'includes/class-csv-export.php';
 		require_once ART_FORMS_PLUGIN_DIR . 'includes/class-rest.php';

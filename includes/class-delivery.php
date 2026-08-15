@@ -132,6 +132,10 @@ class Art_Forms_Delivery {
 			)
 		);
 
-		wp_mail( $to, $subject, $body, array( 'Content-Type: text/plain; charset=UTF-8' ) );
+		$headers = class_exists( 'Art_Forms_Delivery_Email' )
+			? Art_Forms_Delivery_Email::mail_headers( 'text/plain; charset=UTF-8' )
+			: array( 'Content-Type: text/plain; charset=UTF-8' );
+
+		wp_mail( $to, $subject, $body, $headers );
 	}
 }

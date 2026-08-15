@@ -12,6 +12,8 @@ defined( 'ABSPATH' ) || exit;
  */
 class Art_Forms_Delivery_Email {
 
+	const CRM_LINK_TOKEN = '%%ART_FORMS_CRM_LINK%%';
+
 	/**
 	 * Deliver email for context.
 	 *
@@ -46,15 +48,17 @@ class Art_Forms_Delivery_Email {
 			self::render_template( isset( $action['email_subject'] ) ? (string) $action['email_subject'] : '', $context )
 		);
 		$body    = self::render_template( isset( $action['email_body'] ) ? (string) $action['email_body'] : '', $context );
+		$body    = self::ensure_crm_link_in_admin_body( $body, $context );
 
 		if ( ! empty( $args['is_test'] ) ) {
 			$subject = '[TEST] ' . $subject;
 			$body    = __( 'Это тестовое письмо ART Forms.', 'art-forms' ) . "\n\n" . $body;
 		}
 
-		$headers = array( 'Content-Type: text/plain; charset=UTF-8' );
+		$headers = self::mail_headers( 'text/html; charset=UTF-8' );
+		$html    = self::admin_body_to_html( $body, $context );
 
-		$sent = wp_mail( $to_list, $subject, $body, $headers );
+		$sent = wp_mail( $to_list, $subject, $html, $headers );
 
 		if ( $sent ) {
 			return array(
@@ -107,7 +111,7 @@ class Art_Forms_Delivery_Email {
 			$body    = __( 'Это тестовое письмо клиенту ART Forms.', 'art-forms' ) . "\n\n" . $body;
 		}
 
-		$headers = array( 'Content-Type: text/plain; charset=UTF-8' );
+		$headers = self::mail_headers( 'text/plain; charset=UTF-8' );
 		$sent    = wp_mail( $to, $subject, $body, $headers );
 
 		if ( $sent ) {
@@ -147,6 +151,69 @@ class Art_Forms_Delivery_Email {
 	}
 
 	/**
+	 * wp_mail headers with site name as sender (not the default "WordPress").
+	 *
+	 * @param string $content_type Content-Type header value.
+	 * @return array<int, string>
+	 */
+	public static function mail_headers( $content_type = 'text/plain; charset=UTF-8' ) {
+		return array(
+			'Content-Type: ' . $content_type,
+			self::from_header(),
+		);
+	}
+
+	/**
+	 * From header line.
+	 *
+	 * @return string
+	 */
+	public static function from_header() {
+		$name  = self::from_name();
+		$email = self::from_email();
+		$name  = str_replace( array( '"', "\r", "\n" ), '', $name );
+
+		return sprintf( 'From: "%s" <%s>', $name, $email );
+	}
+
+	/**
+	 * Sender display name.
+	 *
+	 * @return string
+	 */
+	public static function from_name() {
+		$name = wp_specialchars_decode( (string) get_bloginfo( 'name' ), ENT_QUOTES );
+		$name = trim( wp_strip_all_tags( $name ) );
+		$name = str_replace( array( "\r", "\n" ), '', $name );
+		if ( '' === $name ) {
+			$name = 'ART Forms';
+		}
+
+		return $name;
+	}
+
+	/**
+	 * Sender address on the site domain (not wordpress@).
+	 *
+	 * @return string
+	 */
+	public static function from_email() {
+		$host = wp_parse_url( home_url(), PHP_URL_HOST );
+		$host = is_string( $host ) ? strtolower( $host ) : '';
+		if ( 0 === strpos( $host, 'www.' ) ) {
+			$host = substr( $host, 4 );
+		}
+
+		$email = '' !== $host ? 'forms@' . $host : '';
+		if ( is_email( $email ) ) {
+			return $email;
+		}
+
+		$admin = sanitize_email( (string) get_option( 'admin_email', '' ) );
+		return is_email( $admin ) ? $admin : 'forms@localhost';
+	}
+
+	/**
 	 * Replace placeholders in template.
 	 *
 	 * @param string               $template Template.
@@ -167,14 +234,18 @@ class Art_Forms_Delivery_Email {
 
 		$page_url = isset( $context['page_url'] ) ? Art_Forms_Schema::format_display_url( (string) $context['page_url'] ) : '';
 		$referrer = isset( $context['referrer'] ) ? Art_Forms_Schema::format_display_url( (string) $context['referrer'] ) : '';
+		$crm_url  = self::crm_card_url( $context );
 
 		$replacements = array(
 			'{form_title}'     => isset( $context['form_title'] ) ? (string) $context['form_title'] : '',
 			'{submission_id}'  => isset( $context['submission_id'] ) ? (string) $context['submission_id'] : '',
 			'{email}'          => isset( $context['contact_email'] ) ? (string) $context['contact_email'] : '',
 			'{phone}'          => isset( $context['contact_phone'] ) ? (string) $context['contact_phone'] : '',
+			'{name}'           => isset( $context['contact_name'] ) ? (string) $context['contact_name'] : '',
 			'{page_url}'       => $page_url,
 			'{referrer}'       => $referrer,
+			'{crm_url}'        => $crm_url,
+			'{crm_link}'       => self::CRM_LINK_TOKEN,
 			'{all_fields}'     => $all_fields,
 			'{utm_source}'     => isset( $context['utm_source'] ) ? (string) $context['utm_source'] : '',
 			'{utm_medium}'     => isset( $context['utm_medium'] ) ? (string) $context['utm_medium'] : '',
@@ -187,6 +258,110 @@ class Art_Forms_Delivery_Email {
 		}
 
 		return strtr( $template, $replacements );
+	}
+
+	/**
+	 * Admin URL of the lead card (or form inbox when id is missing).
+	 *
+	 * @param array<string, mixed> $context Context.
+	 * @return string
+	 */
+	public static function crm_card_url( array $context ) {
+		$fid = isset( $context['form_id'] ) ? absint( $context['form_id'] ) : 0;
+		if ( $fid <= 0 ) {
+			return '';
+		}
+
+		$args = array(
+			'page'    => 'art-forms-submissions',
+			'form_id' => $fid,
+		);
+		$sid = isset( $context['crm_submission_id'] ) ? absint( $context['crm_submission_id'] ) : 0;
+		if ( $sid <= 0 ) {
+			$sid = isset( $context['submission_id'] ) ? absint( $context['submission_id'] ) : 0;
+		}
+		if ( $sid > 0 ) {
+			$args['view'] = $sid;
+		}
+
+		return add_query_arg( $args, admin_url( 'admin.php' ) );
+	}
+
+	/**
+	 * Place CRM link after the page line; drop the old footer block.
+	 *
+	 * @param string               $body    Rendered body.
+	 * @param array<string, mixed> $context Context.
+	 * @return string
+	 */
+	private static function ensure_crm_link_in_admin_body( $body, array $context ) {
+		$body    = (string) $body;
+		$token   = self::CRM_LINK_TOKEN;
+		$crm_url = self::crm_card_url( $context );
+		$page_url = isset( $context['page_url'] ) ? Art_Forms_Schema::format_display_url( (string) $context['page_url'] ) : '';
+
+		$body = preg_replace( '/\n*Открыть в CRM:\s*\n?/u', "\n", $body );
+		if ( is_string( $body ) && '' !== $crm_url ) {
+			$body = str_replace( $crm_url, '', $body );
+		}
+		$body = is_string( $body ) ? $body : '';
+		$body = preg_replace( "/\n{3,}/", "\n\n", $body );
+		$body = is_string( $body ) ? $body : '';
+
+		if ( false !== strpos( $body, $token ) ) {
+			return $body;
+		}
+
+		$lines    = preg_split( "/\r\n|\n|\r/", $body );
+		$out      = array();
+		$inserted = false;
+		if ( is_array( $lines ) ) {
+			foreach ( $lines as $line ) {
+				$out[] = $line;
+				if ( $inserted ) {
+					continue;
+				}
+				if ( '' !== $page_url && false !== strpos( $line, $page_url ) ) {
+					$out[]      = $token;
+					$inserted   = true;
+					continue;
+				}
+				if ( 0 === strpos( $line, 'Страница:' ) ) {
+					$out[]    = $token;
+					$inserted = true;
+				}
+			}
+		}
+
+		if ( ! $inserted ) {
+			$out[] = $token;
+		}
+
+		return implode( "\n", $out );
+	}
+
+	/**
+	 * Convert admin email body to HTML with a new-tab CRM link.
+	 *
+	 * @param string               $body    Plain body with token.
+	 * @param array<string, mixed> $context Context.
+	 * @return string
+	 */
+	private static function admin_body_to_html( $body, array $context ) {
+		$token   = self::CRM_LINK_TOKEN;
+		$crm_url = self::crm_card_url( $context );
+		$label   = __( 'Открыть ответ в CRM', 'art-forms' );
+
+		$html = nl2br( esc_html( (string) $body ), false );
+		if ( $crm_url ) {
+			$anchor = '<a href="' . esc_url( $crm_url ) . '" target="_blank" rel="noopener noreferrer">' . esc_html( $label ) . '</a>';
+		} else {
+			$anchor = esc_html( $label );
+		}
+
+		$html = str_replace( esc_html( $token ), $anchor, $html );
+
+		return '<div style="font-family:sans-serif;font-size:14px;line-height:1.5;">' . $html . '</div>';
 	}
 
 	/**
@@ -221,7 +396,7 @@ class Art_Forms_Delivery_Email {
 
 		foreach ( Art_Forms_Schema::flatten_fields( $schema ) as $field ) {
 			$key   = isset( $field['key'] ) ? $field['key'] : '';
-			$label = isset( $field['label'] ) ? $field['label'] : $key;
+			$label = Art_Forms_Schema::field_display_label( $field );
 			$type  = isset( $field['type'] ) ? $field['type'] : 'text';
 			if ( '' === $key ) {
 				continue;
@@ -257,7 +432,11 @@ class Art_Forms_Delivery_Email {
 
 		$email = '';
 		$phone = '';
+		$name  = '';
 		foreach ( Art_Forms_Schema::flatten_fields( $schema ) as $field ) {
+			if ( 'name' === $field['type'] && isset( $payload[ $field['key'] ] ) && '' === $name ) {
+				$name = (string) $payload[ $field['key'] ];
+			}
 			if ( 'email' === $field['type'] && isset( $payload[ $field['key'] ] ) ) {
 				$email = (string) $payload[ $field['key'] ];
 			}
@@ -267,8 +446,9 @@ class Art_Forms_Delivery_Email {
 		}
 
 		return array(
-			'submission_id'  => 0,
-			'form_id'        => $form_id,
+			'submission_id'     => 0,
+			'crm_submission_id' => class_exists( 'Art_Forms_Submissions' ) ? Art_Forms_Submissions::latest_id_for_form( $form_id ) : 0,
+			'form_id'           => $form_id,
 			'form_title'     => get_the_title( $form_id ),
 			'created_at'     => current_time( 'mysql', true ),
 			'status'         => 'new',
@@ -276,6 +456,7 @@ class Art_Forms_Delivery_Email {
 			'ip'             => '',
 			'contact_email'  => $email,
 			'contact_phone'  => $phone,
+			'contact_name'   => $name,
 			'page_url'       => home_url( '/' ),
 			'referrer'       => '',
 			'utm_source'     => 'test',

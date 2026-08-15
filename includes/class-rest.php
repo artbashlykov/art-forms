@@ -132,13 +132,17 @@ class Art_Forms_Rest {
 		}
 
 		$payload = $validated;
-		$email   = '';
-		$phone   = '';
+		$email = '';
+		$phone = '';
+		$name  = '';
 
 		foreach ( Art_Forms_Schema::flatten_fields( $schema ) as $field ) {
 			$key = $field['key'];
 			if ( ! isset( $payload[ $key ] ) ) {
 				continue;
+			}
+			if ( 'name' === $field['type'] && '' === $name ) {
+				$name = Art_Forms_Submissions::sanitize_contact_name( is_scalar( $payload[ $key ] ) ? (string) $payload[ $key ] : '' );
 			}
 			if ( 'email' === $field['type'] && '' === $email ) {
 				$email = sanitize_email( is_scalar( $payload[ $key ] ) ? (string) $payload[ $key ] : '' );
@@ -180,6 +184,7 @@ class Art_Forms_Rest {
 				'ip'            => self::client_ip(),
 				'contact_email' => $email,
 				'contact_phone' => $phone,
+				'contact_name'  => $name,
 				'page_url'      => $page_url,
 				'referrer'      => $referrer,
 				'utm_source'    => $utm['utm_source'],
@@ -453,6 +458,7 @@ class Art_Forms_Rest {
 				case 'hidden':
 				case 'tel':
 				case 'text':
+				case 'name':
 				default:
 					if ( ! is_scalar( $raw ) ) {
 						$errors[] = sprintf(

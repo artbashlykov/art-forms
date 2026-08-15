@@ -131,6 +131,17 @@
 	}
 
 	function renderMeta(data) {
+		var nameLine = '<p><strong>' + esc(str('name', 'Имя')) + ':</strong> ';
+		if (cardEditing) {
+			nameLine +=
+				'<input type="text" class="art-forms-crm-edit-input" id="art-forms-crm-edit-name" value="' +
+				esc(data.contact_name || '') +
+				'" />';
+		} else {
+			nameLine += esc(data.contact_name || '—');
+		}
+		nameLine += '</p>';
+
 		var emailLine =
 			'<p><strong>Email:</strong> ';
 		if (cardEditing) {
@@ -209,6 +220,7 @@
 		tagsLine += '</p>';
 
 		var metaHtml =
+			nameLine +
 			emailLine +
 			phoneLine +
 			prioLine +
@@ -308,11 +320,20 @@
 	function renderFields(data) {
 		var fieldsHtml = '<dl class="art-forms-crm-fields-list">';
 		(data.fields || []).forEach(function (f) {
-			fieldsHtml += '<div><dt>' + esc(f.label) + '</dt><dd>';
+			var wrapClass = f.type === 'consent' ? ' class="is-consent"' : '';
+			fieldsHtml += '<div' + wrapClass + '><dt>' + esc(f.label) + '</dt><dd>';
 			if (cardEditing) {
 				fieldsHtml += renderFieldEditor(f);
 			} else {
 				fieldsHtml += esc(f.value);
+				if (f.type === 'consent' && f.privacy_url) {
+					fieldsHtml +=
+						' <a class="art-forms-crm-consent-doc" href="' +
+						esc(f.privacy_url) +
+						'" target="_blank" rel="noopener noreferrer">' +
+						esc(str('consentDoc', 'документ')) +
+						'</a>';
+				}
 			}
 			fieldsHtml += '</dd></div>';
 		});
@@ -389,6 +410,19 @@
 					tagsCell.appendChild(tText);
 				}
 				tText.textContent = tagsStr;
+			}
+			var nameCell = row.querySelector('td[data-col="name"]');
+			if (nameCell) {
+				var cname = (data.contact_name || '').trim();
+				nameCell.setAttribute('data-full', cname);
+				var nText = nameCell.querySelector('.art-forms-crm-cell-text');
+				if (!nText) {
+					nText = document.createElement('span');
+					nText.className = 'art-forms-crm-cell-text';
+					nameCell.innerHTML = '';
+					nameCell.appendChild(nText);
+				}
+				nText.textContent = cname || '—';
 			}
 		}
 
@@ -648,6 +682,7 @@
 			saveBtn.addEventListener('click', function () {
 				var emailEl = document.getElementById('art-forms-crm-edit-email');
 				var phoneEl = document.getElementById('art-forms-crm-edit-phone');
+				var nameEl = document.getElementById('art-forms-crm-edit-name');
 				var email = emailEl ? emailEl.value.trim() : '';
 				if (email && email.indexOf('@') === -1) {
 					alert(str('invalidEmail'));
@@ -656,6 +691,7 @@
 				saveBtn.disabled = true;
 				post('art_forms_crm_update_fields', {
 					id: currentId,
+					contact_name: nameEl ? nameEl.value : '',
 					contact_email: email,
 					contact_phone: phoneEl ? phoneEl.value : '',
 					priority: (document.getElementById('art-forms-crm-edit-priority') || {}).value || 0,
@@ -1483,6 +1519,7 @@
 					return;
 				}
 				var hay = card.textContent || '';
+				hay += ' ' + (card.getAttribute('data-full') || '');
 				card.hidden = hay.toLowerCase().indexOf(q) === -1;
 			});
 		}

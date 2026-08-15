@@ -85,7 +85,7 @@ $tabs = isset( $tabs ) && is_array( $tabs ) ? $tabs : array(
 				<div class="art-forms-field-block">
 					<label class="art-forms-label" for="default_email_body"><?php echo esc_html__( 'Текст письма по умолчанию', 'art-forms' ); ?></label>
 					<textarea class="art-forms-input art-forms-textarea" rows="10" id="default_email_body" name="default_email_body"><?php echo esc_textarea( $settings['default_email_body'] ); ?></textarea>
-					<p class="art-forms-hint"><?php echo esc_html__( 'Плейсхолдеры: {form_title}, {submission_id}, {email}, {phone}, {all_fields}, {page_url}, {field:key}', 'art-forms' ); ?></p>
+					<p class="art-forms-hint"><?php echo esc_html__( 'Плейсхолдеры: {form_title}, {submission_id}, {name}, {email}, {phone}, {all_fields}, {page_url}, {crm_link}, {field:key}', 'art-forms' ); ?></p>
 				</div>
 
 				<div class="art-forms-field-block">
@@ -184,7 +184,7 @@ $tabs = isset( $tabs ) && is_array( $tabs ) ? $tabs : array(
 							<input type="checkbox" name="crm_notify_enabled" value="1" <?php checked( ! empty( $settings['crm_notify_enabled'] ) ); ?> />
 							<?php echo esc_html__( 'Письмо менеджеру о новой заявке (со ссылкой в CRM)', 'art-forms' ); ?>
 						</label>
-						<p class="art-forms-hint"><?php echo esc_html__( 'Бейдж непрочитанных в меню «Ответы» работает всегда. Письмо можно отключить, если хватает уведомлений формы.', 'art-forms' ); ?></p>
+						<p class="art-forms-hint"><?php echo esc_html__( 'Бейдж непрочитанных в меню «Ответы» работает всегда. Отдельное CRM-письмо не уходит, если форма уже шлёт «Письмо на свою почту» на те же адреса. Включите, если менеджерам нужен короткий пинг на другой email.', 'art-forms' ); ?></p>
 					</div>
 					<div class="art-forms-field-block">
 						<label class="art-forms-label" for="crm_notify_email"><?php echo esc_html__( 'Email для CRM-уведомлений', 'art-forms' ); ?></label>

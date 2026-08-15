@@ -122,6 +122,7 @@ class Art_Forms_Submissions {
 			'ip'             => isset( $data['ip'] ) ? sanitize_text_field( (string) $data['ip'] ) : '',
 			'contact_email'  => isset( $data['contact_email'] ) ? sanitize_email( (string) $data['contact_email'] ) : '',
 			'contact_phone'  => isset( $data['contact_phone'] ) ? sanitize_text_field( (string) $data['contact_phone'] ) : '',
+			'contact_name'   => self::sanitize_contact_name( isset( $data['contact_name'] ) ? $data['contact_name'] : '' ),
 			'page_url'       => isset( $data['page_url'] ) ? esc_url_raw( (string) $data['page_url'] ) : '',
 			'referrer'       => isset( $data['referrer'] ) ? esc_url_raw( (string) $data['referrer'] ) : '',
 			'utm_source'     => isset( $data['utm_source'] ) ? sanitize_text_field( (string) $data['utm_source'] ) : '',
@@ -150,6 +151,7 @@ class Art_Forms_Submissions {
 				'%s', // ip
 				'%s', // contact_email
 				'%s', // contact_phone
+				'%s', // contact_name
 				'%s', // page_url
 				'%s', // referrer
 				'%s', // utm_source
@@ -196,6 +198,34 @@ class Art_Forms_Submissions {
 		}
 
 		return self::hydrate( $row );
+	}
+
+	/**
+	 * Latest submission id for a form (for test CRM links).
+	 *
+	 * @param int $form_id Form ID.
+	 * @return int
+	 */
+	public static function latest_id_for_form( $form_id ) {
+		global $wpdb;
+
+		$form_id = absint( $form_id );
+		if ( $form_id <= 0 ) {
+			return 0;
+		}
+
+		$table_sql = self::table_sql();
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+		$id = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT id FROM {$table_sql} WHERE form_id = %d ORDER BY id DESC LIMIT 1",
+				$form_id
+			)
+		);
+		// phpcs:enable
+
+		return absint( $id );
 	}
 
 	/**
@@ -246,6 +276,7 @@ class Art_Forms_Submissions {
 			'date'   => 's.created_at',
 			'email'  => 's.contact_email',
 			'phone'  => 's.contact_phone',
+			'name'   => 's.contact_name',
 			'status' => 's.status',
 			'stage'  => 's.stage_id',
 			'star'        => 's.is_starred',
@@ -314,7 +345,8 @@ class Art_Forms_Submissions {
 
 		if ( '' !== $search ) {
 			$like     = '%' . $wpdb->esc_like( $search ) . '%';
-			$where[]  = '(s.contact_email LIKE %s OR s.contact_phone LIKE %s OR s.payload LIKE %s)';
+			$where[]  = '(s.contact_name LIKE %s OR s.contact_email LIKE %s OR s.contact_phone LIKE %s OR s.payload LIKE %s)';
+			$params[] = $like;
 			$params[] = $like;
 			$params[] = $like;
 			$params[] = $like;
@@ -738,6 +770,7 @@ class Art_Forms_Submissions {
 					END AS contact_key,
 					MAX(contact_email) AS contact_email,
 					MAX(contact_phone) AS contact_phone,
+					MAX(contact_name) AS contact_name,
 					COUNT(*) AS submissions_count,
 					MAX(created_at) AS last_at,
 					MAX(id) AS last_id
@@ -764,6 +797,7 @@ class Art_Forms_Submissions {
 				'contact_key'       => (string) $row['contact_key'],
 				'contact_email'     => (string) $row['contact_email'],
 				'contact_phone'     => (string) $row['contact_phone'],
+				'contact_name'      => isset( $row['contact_name'] ) ? (string) $row['contact_name'] : '',
 				'submissions_count' => absint( $row['submissions_count'] ),
 				'last_at'           => (string) $row['last_at'],
 				'last_id'           => absint( $row['last_id'] ),
@@ -892,7 +926,7 @@ class Art_Forms_Submissions {
 	 * Update contact fields and/or payload for a lead.
 	 *
 	 * @param int                  $id   Submission ID.
-	 * @param array<string, mixed> $data Keys: contact_email?, contact_phone?, payload? (map).
+	 * @param array<string, mixed> $data Keys: contact_email?, contact_phone?, contact_name?, payload? (map).
 	 * @return array<string, mixed>|false Updated submission or false.
 	 */
 	public static function update_lead_fields( $id, array $data ) {
@@ -910,6 +944,7 @@ class Art_Forms_Submissions {
 
 		$email = (string) $sub['contact_email'];
 		$phone = (string) $sub['contact_phone'];
+		$name  = isset( $sub['contact_name'] ) ? (string) $sub['contact_name'] : '';
 
 		if ( array_key_exists( 'contact_email', $data ) ) {
 			$raw_email = sanitize_text_field( (string) $data['contact_email'] );
@@ -924,6 +959,10 @@ class Art_Forms_Submissions {
 			if ( strlen( $phone ) > 50 ) {
 				$phone = substr( $phone, 0, 50 );
 			}
+		}
+
+		if ( array_key_exists( 'contact_name', $data ) ) {
+			$name = self::sanitize_contact_name( $data['contact_name'] );
 		}
 
 		if ( isset( $data['payload'] ) && is_array( $data['payload'] ) ) {
@@ -941,16 +980,29 @@ class Art_Forms_Submissions {
 			}
 		}
 
+		foreach ( $fields_map as $field ) {
+			if ( empty( $field['type'] ) || 'name' !== $field['type'] || empty( $field['key'] ) ) {
+				continue;
+			}
+			if ( array_key_exists( 'contact_name', $data ) ) {
+				$payload[ $field['key'] ] = $name;
+			} elseif ( isset( $payload[ $field['key'] ] ) ) {
+				$name = self::sanitize_contact_name( $payload[ $field['key'] ] );
+			}
+			break;
+		}
+
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$updated = $wpdb->update(
 			self::table(),
 			array(
 				'contact_email' => $email,
 				'contact_phone' => $phone,
+				'contact_name'  => $name,
 				'payload'       => Art_Forms_Schema::encode_json( $payload ),
 			),
 			array( 'id' => $id ),
-			array( '%s', '%s', '%s' ),
+			array( '%s', '%s', '%s', '%s' ),
 			array( '%d' )
 		);
 
@@ -1179,12 +1231,28 @@ class Art_Forms_Submissions {
 				$tags = $row['tags'];
 			}
 		}
-		$row['tags']        = self::sanitize_tags( $tags );
-		$row['payload']     = $payload;
-		$row['meta']        = $meta;
-		$row['payload_raw'] = $payload;
+		$row['tags']          = self::sanitize_tags( $tags );
+		$row['payload']       = $payload;
+		$row['meta']          = $meta;
+		$row['payload_raw']   = $payload;
+		$row['contact_name']  = isset( $row['contact_name'] ) ? (string) $row['contact_name'] : '';
 
 		return $row;
+	}
+
+	/**
+	 * Sanitize stored contact name.
+	 *
+	 * @param mixed $value Raw value.
+	 * @return string
+	 */
+	public static function sanitize_contact_name( $value ) {
+		$name = sanitize_text_field( is_scalar( $value ) ? (string) $value : '' );
+		if ( function_exists( 'mb_substr' ) ) {
+			return mb_substr( $name, 0, 190 );
+		}
+
+		return substr( $name, 0, 190 );
 	}
 
 	/**
@@ -1211,7 +1279,7 @@ class Art_Forms_Submissions {
 		$labeled = array();
 		foreach ( $payload as $key => $value ) {
 			$field             = isset( $fields_map[ $key ] ) ? $fields_map[ $key ] : array( 'key' => $key, 'label' => $key, 'type' => 'text' );
-			$label             = isset( $field['label'] ) && '' !== (string) $field['label'] ? (string) $field['label'] : (string) $key;
+			$label             = Art_Forms_Schema::field_display_label( $field );
 			$labeled[ $label ] = Art_Forms_Schema::format_display_value( $field, $value );
 		}
 
@@ -1225,6 +1293,7 @@ class Art_Forms_Submissions {
 			'ip'             => $submission['ip'],
 			'contact_email'  => $submission['contact_email'],
 			'contact_phone'  => $submission['contact_phone'],
+			'contact_name'   => isset( $submission['contact_name'] ) ? $submission['contact_name'] : '',
 			'page_url'       => Art_Forms_Schema::format_display_url( (string) $submission['page_url'] ),
 			'referrer'       => Art_Forms_Schema::format_display_url( (string) $submission['referrer'] ),
 			'utm_source'     => $submission['utm_source'],

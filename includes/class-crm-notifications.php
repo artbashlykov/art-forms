@@ -68,7 +68,20 @@ class Art_Forms_Crm_Notifications {
 			return false;
 		}
 
-		$form_id    = (int) $submission['form_id'];
+		$normalized_crm = array();
+		foreach ( $to_list as $email ) {
+			$normalized_crm[] = strtolower( $email );
+		}
+
+		$form_id = (int) $submission['form_id'];
+		$admin_to = class_exists( 'Art_Forms_Form_Actions' )
+			? Art_Forms_Form_Actions::admin_email_recipients( $form_id )
+			: array();
+		if ( ! empty( array_intersect( $normalized_crm, $admin_to ) ) ) {
+			// Form already sends a full notification to the same inbox.
+			return false;
+		}
+
 		$form_title = get_the_title( $form_id );
 		if ( '' === $form_title ) {
 			$form_title = __( '(без названия)', 'art-forms' );
@@ -103,6 +116,9 @@ class Art_Forms_Crm_Notifications {
 				$submission_id
 			),
 		);
+		if ( ! empty( $submission['contact_name'] ) ) {
+			$lines[] = __( 'Имя:', 'art-forms' ) . ' ' . $submission['contact_name'];
+		}
 		if ( ! empty( $submission['contact_email'] ) ) {
 			$lines[] = 'Email: ' . $submission['contact_email'];
 		}
@@ -114,7 +130,9 @@ class Art_Forms_Crm_Notifications {
 		$lines[] = $crm_url;
 
 		$body    = implode( "\n", $lines );
-		$headers = array( 'Content-Type: text/plain; charset=UTF-8' );
+		$headers = class_exists( 'Art_Forms_Delivery_Email' )
+			? Art_Forms_Delivery_Email::mail_headers( 'text/plain; charset=UTF-8' )
+			: array( 'Content-Type: text/plain; charset=UTF-8' );
 
 		return (bool) wp_mail( $to_list, $subject, $body, $headers );
 	}

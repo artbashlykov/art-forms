@@ -196,6 +196,8 @@ class Art_Forms_Stages {
 		$slug = isset( $data['slug'] ) ? sanitize_key( (string) $data['slug'] ) : '';
 		if ( '' === $slug ) {
 			$slug = self::unique_slug( $form_id, sanitize_title( $title ) );
+		} else {
+			$slug = self::unique_slug( $form_id, $slug );
 		}
 
 		$color = isset( $data['color'] ) ? self::sanitize_color( (string) $data['color'] ) : '#2271b1';

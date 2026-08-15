@@ -133,6 +133,7 @@
 	function typeLabel(type) {
 		var labels = {
 			text: str('typeText', 'Текст'),
+			name: str('typeName', 'Имя'),
 			email: str('typeEmail', 'Email'),
 			tel: str('typeTel', 'Телефон'),
 			textarea: str('typeTextarea', 'Многострочный текст'),
@@ -145,9 +146,38 @@
 		return labels[type] || type;
 	}
 
+	function fieldDisplayLabel(field) {
+		var label = ((field && field.label) || '').trim();
+		if (!label) {
+			label = (field && field.key) || str('noLabel', 'Без подписи');
+		}
+		if (!field || field.type !== 'consent') {
+			return label;
+		}
+		var linkText = (field.privacy_link_text || '').trim();
+		var url =
+			(field.privacy_url || '').trim() ||
+			(window.artFormsAdmin && artFormsAdmin.defaultPrivacyUrl) ||
+			'';
+		if (!linkText && url) {
+			linkText = str(
+				'privacyLinkPlaceholder',
+				'политикой конфиденциальности'
+			);
+		}
+		if (!linkText) {
+			return label;
+		}
+		if (label.toLowerCase().indexOf(linkText.toLowerCase()) !== -1) {
+			return label;
+		}
+		return (label + ' ' + linkText).trim();
+	}
+
 	function typeHint(type) {
 		var hints = {
 			text: str('hintText', 'Одна строка текста.'),
+			name: str('hintName', 'Имя человека. Показывается в карточке CRM перед email и телефоном.'),
 			email: str('hintEmail', 'Проверка формата email.'),
 			tel: str('hintTel', 'Поле для телефона.'),
 			textarea: str('hintTextarea', 'Длинный текст в несколько строк.'),
@@ -841,7 +871,10 @@
 
 		var labelText = document.createElement('span');
 		labelText.className = 'art-forms-field-summary-label';
-		labelText.textContent = field.label || str('noLabel', 'Без подписи');
+		if (field.type === 'consent') {
+			labelText.classList.add('is-consent');
+		}
+		labelText.textContent = fieldDisplayLabel(field);
 
 		var keyCode = document.createElement('code');
 		keyCode.className = 'art-forms-field-summary-key';
@@ -932,8 +965,7 @@
 			markDirty();
 			var summaryLabel = card.querySelector('.art-forms-field-summary-label');
 			if (summaryLabel) {
-				summaryLabel.textContent =
-					field.label || str('noLabel', 'Без подписи');
+				summaryLabel.textContent = fieldDisplayLabel(field);
 			}
 		});
 
@@ -1197,6 +1229,10 @@
 				field.privacy_url = privacyUrl.value.trim();
 				syncSchema(schema);
 				markDirty();
+				var summaryLabel = card.querySelector('.art-forms-field-summary-label');
+				if (summaryLabel) {
+					summaryLabel.textContent = fieldDisplayLabel(field);
+				}
 			});
 
 			var privacyLinkText = document.createElement('input');
@@ -1210,6 +1246,10 @@
 				field.privacy_link_text = privacyLinkText.value;
 				syncSchema(schema);
 				markDirty();
+				var summaryLabel = card.querySelector('.art-forms-field-summary-label');
+				if (summaryLabel) {
+					summaryLabel.textContent = fieldDisplayLabel(field);
+				}
 			});
 
 			consentExtra.appendChild(
@@ -1275,6 +1315,7 @@
 		});
 		var fieldTypes = parseJson('art-forms-field-types', [
 			'text',
+			'name',
 			'email',
 			'tel',
 			'textarea',

@@ -4,7 +4,7 @@ Tags: forms, quiz, survey, leads, email
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.1.31
+Stable tag: 1.1.32
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -42,7 +42,19 @@ No. You paste the designed HTML/CSS/JS on a page. ART Forms provides the schema,
 
 Forms with `data-art-form-id` are handled by the ART Forms runtime and posted to the REST endpoint.
 
+= How do I move a form to another site? =
+
+On the Forms list, export a JSON pack, then import it on the destination site. Submissions are not copied. After import, update `data-art-form-id` (and the honeypot field name) in the page markup to the new form ID.
+
 == Changelog ==
+
+= 1.1.32 =
+* Export and import forms between sites (JSON pack: schema, settings, CRM stages; submissions are not copied).
+* Form field type “name”: shown on the CRM card and in the table; search includes name.
+* Consent: full agreement text in CRM, emails, and the form editor list.
+* Admin submission email: HTML “Open in CRM” link after the page URL; test mail links to the latest real lead card.
+* Skip the CRM “new lead” email when the same recipients already get the form’s admin email.
+* Outgoing mail uses the site title as the From name (not “WordPress”).
 
 = 1.1.31 =
 * CRM “Hide columns”: include all table columns (star, priority, tags, ID, date, stage, and form fields).
