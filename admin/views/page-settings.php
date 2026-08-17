@@ -95,9 +95,9 @@ $tabs = isset( $tabs ) && is_array( $tabs ) ? $tabs : array(
 				</div>
 
 				<div class="art-forms-field-block">
-					<label class="art-forms-label" for="default_privacy_url"><?php echo esc_html__( 'URL политики конфиденциальности', 'art-forms' ); ?></label>
+					<label class="art-forms-label" for="default_privacy_url"><?php echo esc_html__( 'Ссылка по умолчанию для полей «Согласие»', 'art-forms' ); ?></label>
 					<input type="url" class="art-forms-input" id="default_privacy_url" name="default_privacy_url" value="<?php echo esc_attr( $settings['default_privacy_url'] ); ?>" placeholder="https://" />
-					<p class="art-forms-hint"><?php echo esc_html__( 'Подставляется в поля «Согласие на ПДн», если у поля не указана своя ссылка.', 'art-forms' ); ?></p>
+					<p class="art-forms-hint"><?php echo esc_html__( 'Подставляется в поля «Согласие», если у поля не указана своя ссылка. Например политика конфиденциальности или оферта.', 'art-forms' ); ?></p>
 				</div>
 			</section>
 

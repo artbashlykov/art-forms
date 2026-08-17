@@ -4,7 +4,7 @@ Tags: forms, quiz, survey, leads, email
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.1.36
+Stable tag: 1.1.37
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,7 +24,7 @@ Features:
 * After-submit actions: admin email, client email, delayed redirect
 * Email templates with placeholders
 * Delivery log, CSV export, form duplication
-* Consent field type for privacy agreement
+* Consent checkbox (privacy policy, mailing, or any other agreement)
 
 == Installation ==
 
@@ -47,6 +47,10 @@ Forms with `data-art-form-id` are handled by the ART Forms runtime and posted to
 On the Forms list, export a JSON pack, then import it on the destination site. Submissions are not copied. After import, update `data-art-form-id` (and the honeypot field name) in the page markup to the new form ID.
 
 == Changelog ==
+
+= 1.1.37 =
+* Consent field: no duplicate heading above the checkbox in the HTML skeleton and Нейронки prompt.
+* Rename “Согласие на ПДн” to “Согласие” (any agreement: privacy, mailing, etc.).
 
 = 1.1.36 =
 * Form editor: intro title/description, submit button text, and a style brief for Нейронки.

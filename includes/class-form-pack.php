@@ -166,7 +166,7 @@ class Art_Forms_Form_Pack {
 		}
 
 		if ( self::consent_missing_privacy_url( $saved_schema ) ) {
-			$warnings[] = __( 'У поля согласия нет своей ссылки на политику — на этом сайте будет использован адрес из настроек ART Forms.', 'art-forms' );
+			$warnings[] = __( 'У поля «Согласие» нет своей ссылки — на этом сайте будет использован адрес из настроек ART Forms.', 'art-forms' );
 		}
 
 		if ( self::settings_have_email_to( $saved_settings ) ) {

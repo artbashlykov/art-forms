@@ -200,9 +200,10 @@ class Art_Forms_Export {
 		}
 
 		if ( 'consent' === $type ) {
-			$url = Art_Forms_Schema::resolve_privacy_url( $field );
+			$line .= '; галочка с этим текстом, без отдельного заголовка над полем';
+			$url   = Art_Forms_Schema::resolve_privacy_url( $field );
 			if ( '' !== $url ) {
-				$line .= '; ссылка на политику: ' . $url;
+				$line .= '; ссылка: ' . $url;
 			}
 		}
 
@@ -230,7 +231,7 @@ class Art_Forms_Export {
 			'radio'    => __( 'один вариант', 'art-forms' ),
 			'checkbox' => __( 'несколько вариантов', 'art-forms' ),
 			'hidden'   => __( 'скрытое поле', 'art-forms' ),
-			'consent'  => __( 'согласие на ПДн', 'art-forms' ),
+			'consent'  => __( 'согласие', 'art-forms' ),
 		);
 
 		return isset( $labels[ $type ] ) ? $labels[ $type ] : $type;
@@ -257,7 +258,9 @@ class Art_Forms_Export {
 		}
 
 		$lines[] = '    <div class="art-forms-field" data-field-key="' . esc_attr( $key ) . '">';
-		$lines[] = '      <label for="art-forms-' . esc_attr( $key ) . '">' . esc_html( $label ) . ( $required ? ' *' : '' ) . '</label>';
+		if ( 'consent' !== $type ) {
+			$lines[] = '      <label for="art-forms-' . esc_attr( $key ) . '">' . esc_html( $label ) . ( $required ? ' *' : '' ) . '</label>';
+		}
 
 		switch ( $type ) {
 			case 'textarea':
@@ -309,7 +312,7 @@ class Art_Forms_Export {
 				} else {
 					$consent_label = esc_html( $label );
 				}
-				$lines[] = '      <label><input type="checkbox" id="art-forms-' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" value="1"' . $req_attr . ' /> ' . $consent_label . '</label>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above
+				$lines[] = '      <label><input type="checkbox" id="art-forms-' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" value="1"' . $req_attr . ' /> ' . $consent_label . ( $required ? ' *' : '' ) . '</label>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped above
 				break;
 			case 'name':
 				$lines[] = '      <input type="text" id="art-forms-' . esc_attr( $key ) . '" name="' . esc_attr( $key ) . '" autocomplete="name"' . $req_attr . ' />';

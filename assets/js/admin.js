@@ -141,7 +141,7 @@
 			radio: str('typeRadio', 'Варианты (один)'),
 			checkbox: str('typeCheckbox', 'Варианты (несколько)'),
 			hidden: str('typeHidden', 'Скрытое поле'),
-			consent: str('typeConsent', 'Согласие на ПДн')
+			consent: str('typeConsent', 'Согласие')
 		};
 		return labels[type] || type;
 	}
@@ -199,7 +199,7 @@
 			),
 			consent: str(
 				'hintConsent',
-				'Обязательная галочка согласия. Можно добавить ссылку на политику.'
+				'Обязательная галочка. Подпись — любой текст согласия: обработка данных, политика, рассылка. Ссылку можно добавить отдельно.'
 			)
 		};
 		return hints[type] || '';
@@ -477,7 +477,7 @@
 			warnings.push(str('warnNoTel', 'нет поля Телефон'));
 		}
 		if (!hasConsent) {
-			warnings.push(str('warnNoConsent', 'нет согласия на ПДн'));
+			warnings.push(str('warnNoConsent', 'нет поля согласия'));
 		}
 		return warnings;
 	}
@@ -1253,7 +1253,7 @@
 			});
 
 			consentExtra.appendChild(
-				control(str('privacyUrl', 'Ссылка на политику'), privacyUrl)
+				control(str('privacyUrl', 'Ссылка (необязательно)'), privacyUrl)
 			);
 			consentExtra.appendChild(
 				control(str('privacyLinkText', 'Текст ссылки'), privacyLinkText)
