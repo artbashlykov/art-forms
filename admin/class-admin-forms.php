@@ -75,7 +75,7 @@ class Art_Forms_Admin_Forms {
 		$settings = $form_id ? Art_Forms_Form_Settings::get( $form_id ) : Art_Forms_Form_Settings::defaults();
 		$title   = $form ? $form->post_title : '';
 		$code    = $form_id ? Art_Forms_Export::form_code( $form_id ) : '';
-		$prompt  = $form_id ? Art_Forms_Export::chatgpt_prompt( $form_id ) : '';
+		$prompt  = $form_id ? Art_Forms_Export::design_prompt( $form_id ) : '';
 
 		$notice     = '';
 		$just_saved = false;

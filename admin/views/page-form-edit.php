@@ -152,8 +152,8 @@ $export_url     = $form_id ? wp_nonce_url( admin_url( 'admin-post.php?action=art
 		<section class="art-forms-panel art-forms-collapsible is-collapsed" data-collapse-key="export">
 			<button type="button" class="art-forms-collapse-toggle" aria-expanded="false">
 				<span class="art-forms-collapse-titles">
-					<span class="art-forms-collapse-title"><?php echo esc_html__( 'Экспорт для ChatGPT', 'art-forms' ); ?></span>
-					<span class="art-forms-collapse-hint"><?php echo esc_html__( 'Скопируйте код или готовый промпт, отдайте в ChatGPT, затем проверьте результат ниже.', 'art-forms' ); ?></span>
+					<span class="art-forms-collapse-title"><?php echo esc_html__( 'Экспорт для Нейронки', 'art-forms' ); ?></span>
+					<span class="art-forms-collapse-hint"><?php echo esc_html__( 'Скопируйте код или готовый промпт, отдайте в Нейронки, затем проверьте результат ниже.', 'art-forms' ); ?></span>
 				</span>
 				<span class="art-forms-collapse-chevron" aria-hidden="true">▸</span>
 			</button>
@@ -169,7 +169,7 @@ $export_url     = $form_id ? wp_nonce_url( admin_url( 'admin-post.php?action=art
 						<textarea id="art-forms-code" class="art-forms-input art-forms-textarea code" rows="12" readonly><?php echo esc_textarea( $code ); ?></textarea>
 					</div>
 					<div class="art-forms-field-block">
-						<label class="art-forms-label" for="art-forms-prompt"><?php echo esc_html__( 'Промпт для ChatGPT', 'art-forms' ); ?></label>
+						<label class="art-forms-label" for="art-forms-prompt"><?php echo esc_html__( 'Промпт для Нейронки', 'art-forms' ); ?></label>
 						<textarea id="art-forms-prompt" class="art-forms-input art-forms-textarea code" rows="12" readonly><?php echo esc_textarea( $prompt ); ?></textarea>
 					</div>
 				</div>
@@ -180,7 +180,7 @@ $export_url     = $form_id ? wp_nonce_url( admin_url( 'admin-post.php?action=art
 			<button type="button" class="art-forms-collapse-toggle" aria-expanded="false">
 				<span class="art-forms-collapse-titles">
 					<span class="art-forms-collapse-title"><?php echo esc_html__( 'Проверщик кода', 'art-forms' ); ?></span>
-					<span class="art-forms-collapse-hint"><?php echo esc_html__( 'Вставьте HTML+CSS+JS от ChatGPT. Код никуда не сохраняется — только проверка.', 'art-forms' ); ?></span>
+					<span class="art-forms-collapse-hint"><?php echo esc_html__( 'Вставьте HTML+CSS+JS от Нейронки. Код никуда не сохраняется — только проверка.', 'art-forms' ); ?></span>
 				</span>
 				<span class="art-forms-collapse-chevron" aria-hidden="true">▸</span>
 			</button>

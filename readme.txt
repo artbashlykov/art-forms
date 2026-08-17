@@ -4,7 +4,7 @@ Tags: forms, quiz, survey, leads, email
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 1.1.34
+Stable tag: 1.1.35
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,12 +12,12 @@ Build form logic (quizzes, surveys), export code for design, collect submissions
 
 == Description ==
 
-ART Forms helps you define the logic of a WordPress form (linear steps and fields), export a code skeleton for ChatGPT-based design, validate the designed markup against the form contract, and collect submissions with email delivery.
+ART Forms helps you define the logic of a WordPress form (linear steps and fields), export a code skeleton for Нейронки, validate the designed markup against the form contract, and collect submissions with email delivery.
 
 Features:
 
 * Linear multi-step form schema in the admin
-* Copy form code and ChatGPT prompt
+* Copy form code and Нейронки prompt
 * Admin code checker (no storage)
 * Frontend runtime that captures `data-art-form-id` forms
 * CRM-style submissions inbox per form (stages, table/board, lead card, comments)
@@ -47,6 +47,9 @@ Forms with `data-art-form-id` are handled by the ART Forms runtime and posted to
 On the Forms list, export a JSON pack, then import it on the destination site. Submissions are not copied. After import, update `data-art-form-id` (and the honeypot field name) in the page markup to the new form ID.
 
 == Changelog ==
+
+= 1.1.35 =
+* Rename ChatGPT labels to «Нейронки» in the form editor and docs.
 
 = 1.1.34 =
 * Settings: hide the empty Integrations tab until integrations are ready.

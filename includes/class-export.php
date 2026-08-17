@@ -1,6 +1,6 @@
 <?php
 /**
- * Export form code and ChatGPT prompt.
+ * Export form code and Нейронки prompt.
  *
  * @package Art_Forms
  */
@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 class Art_Forms_Export {
 
 	/**
-	 * HTML skeleton for ChatGPT / page paste.
+	 * HTML skeleton for Нейронки / page paste.
 	 *
 	 * @param int $form_id Form ID.
 	 * @return string
@@ -59,12 +59,12 @@ class Art_Forms_Export {
 	}
 
 	/**
-	 * ChatGPT prompt text.
+	 * Нейронки prompt text.
 	 *
 	 * @param int $form_id Form ID.
 	 * @return string
 	 */
-	public static function chatgpt_prompt( $form_id ) {
+	public static function design_prompt( $form_id ) {
 		$form_id = absint( $form_id );
 		$schema  = Art_Forms_Schema::get( $form_id );
 		$title   = get_the_title( $form_id );
