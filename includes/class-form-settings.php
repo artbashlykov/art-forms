@@ -23,8 +23,12 @@ class Art_Forms_Form_Settings {
 		$global = Art_Forms_Settings::get_all();
 
 		return array(
-			'success_message' => (string) $global['default_success_message'],
-			'actions'         => array(
+			'success_message'   => (string) $global['default_success_message'],
+			'submit_label'      => self::default_submit_label(),
+			'intro_title'       => '',
+			'intro_description' => '',
+			'style_brief'       => '',
+			'actions'           => array(
 				Art_Forms_Form_Actions::default_action( 'email_admin' ),
 			),
 		);
@@ -49,6 +53,28 @@ class Art_Forms_Form_Settings {
 			"Здравствуйте!\n\nМы получили вашу заявку «{form_title}» и свяжемся с вами в ближайшее время.\n\nСпасибо!",
 			'art-forms'
 		);
+	}
+
+	/**
+	 * Default submit button text.
+	 *
+	 * @return string
+	 */
+	public static function default_submit_label() {
+		return __( 'Отправить', 'art-forms' );
+	}
+
+	/**
+	 * Submit button text for a form.
+	 *
+	 * @param int $form_id Form ID.
+	 * @return string
+	 */
+	public static function submit_label( $form_id ) {
+		$settings = self::get( $form_id );
+		$label    = isset( $settings['submit_label'] ) ? trim( (string) $settings['submit_label'] ) : '';
+
+		return '' !== $label ? $label : self::default_submit_label();
 	}
 
 	/**
@@ -104,14 +130,25 @@ class Art_Forms_Form_Settings {
 		$settings = self::migrate_legacy( $settings );
 		$merged   = wp_parse_args( $settings, $defaults );
 
-		$merged['success_message'] = self::repair_stripped_newlines( (string) $merged['success_message'] );
-		$merged['actions']         = Art_Forms_Form_Actions::sanitize_list(
+		$merged['success_message']   = self::repair_stripped_newlines( (string) $merged['success_message'] );
+		$merged['submit_label']      = sanitize_text_field( (string) $merged['submit_label'] );
+		if ( '' === $merged['submit_label'] ) {
+			$merged['submit_label'] = self::default_submit_label();
+		}
+		$merged['intro_title']       = sanitize_text_field( (string) $merged['intro_title'] );
+		$merged['intro_description'] = self::repair_stripped_newlines( (string) $merged['intro_description'] );
+		$merged['style_brief']       = self::repair_stripped_newlines( (string) $merged['style_brief'] );
+		$merged['actions']           = Art_Forms_Form_Actions::sanitize_list(
 			isset( $merged['actions'] ) ? $merged['actions'] : array()
 		);
 
 		return array(
-			'success_message' => $merged['success_message'],
-			'actions'         => $merged['actions'],
+			'success_message'   => $merged['success_message'],
+			'submit_label'      => $merged['submit_label'],
+			'intro_title'       => $merged['intro_title'],
+			'intro_description' => $merged['intro_description'],
+			'style_brief'       => $merged['style_brief'],
+			'actions'           => $merged['actions'],
 		);
 	}
 
@@ -138,9 +175,16 @@ class Art_Forms_Form_Settings {
 		}
 
 		$had_actions = isset( $stored['actions'] ) && is_array( $stored['actions'] );
-		$merged      = self::normalize( $stored );
+		$had_submit  = isset( $stored['submit_label'] );
+		if ( ! $had_submit ) {
+			$from_button = Art_Forms_Schema::legacy_button_label( $form_id );
+			if ( '' !== $from_button ) {
+				$stored['submit_label'] = $from_button;
+			}
+		}
+		$merged = self::normalize( $stored );
 
-		$needs_migrate = $legacy || ( ! empty( $stored ) && ! $had_actions );
+		$needs_migrate = $legacy || ( ! empty( $stored ) && ! $had_actions ) || ( ! $had_submit && isset( $stored['submit_label'] ) );
 
 		if ( $needs_migrate && $form_id > 0 && ! empty( $stored ) ) {
 			update_post_meta( $form_id, self::META_KEY, $merged );
@@ -163,6 +207,27 @@ class Art_Forms_Form_Settings {
 		if ( isset( $settings['success_message'] ) ) {
 			$clean['success_message'] = self::repair_stripped_newlines(
 				sanitize_textarea_field( (string) $settings['success_message'] )
+			);
+		}
+
+		if ( isset( $settings['submit_label'] ) ) {
+			$label = sanitize_text_field( (string) $settings['submit_label'] );
+			$clean['submit_label'] = '' !== $label ? $label : self::default_submit_label();
+		}
+
+		if ( isset( $settings['intro_title'] ) ) {
+			$clean['intro_title'] = sanitize_text_field( (string) $settings['intro_title'] );
+		}
+
+		if ( isset( $settings['intro_description'] ) ) {
+			$clean['intro_description'] = self::repair_stripped_newlines(
+				sanitize_textarea_field( (string) $settings['intro_description'] )
+			);
+		}
+
+		if ( isset( $settings['style_brief'] ) ) {
+			$clean['style_brief'] = self::repair_stripped_newlines(
+				sanitize_textarea_field( (string) $settings['style_brief'] )
 			);
 		}
 

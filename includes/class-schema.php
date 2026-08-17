@@ -190,6 +190,9 @@ class Art_Forms_Schema {
 	private static function normalize_field( array $field, array $used_keys, array $prev_keys ) {
 		$label = isset( $field['label'] ) ? sanitize_text_field( self::repair_broken_unicode( (string) $field['label'] ) ) : '';
 		$type  = isset( $field['type'] ) ? sanitize_key( (string) $field['type'] ) : 'text';
+		if ( 'button' === $type ) {
+			return null;
+		}
 		if ( ! in_array( $type, self::FIELD_TYPES, true ) ) {
 			$type = 'text';
 		}
@@ -450,6 +453,41 @@ class Art_Forms_Schema {
 		}
 
 		return $fields;
+	}
+
+	/**
+	 * Submit label stored as a constructor field (legacy, before settings panel).
+	 *
+	 * @param int $form_id Form ID.
+	 * @return string
+	 */
+	public static function legacy_button_label( $form_id ) {
+		$form_id = absint( $form_id );
+		if ( $form_id < 1 ) {
+			return '';
+		}
+
+		$raw = get_post_meta( $form_id, self::META_KEY, true );
+		if ( is_string( $raw ) && '' !== $raw ) {
+			$decoded = json_decode( $raw, true );
+			$raw     = is_array( $decoded ) ? $decoded : array();
+		}
+		if ( ! is_array( $raw ) ) {
+			return '';
+		}
+
+		$label = '';
+		foreach ( self::flatten_fields( $raw ) as $field ) {
+			if ( empty( $field['type'] ) || 'button' !== $field['type'] ) {
+				continue;
+			}
+			$text = isset( $field['label'] ) ? trim( (string) $field['label'] ) : '';
+			if ( '' !== $text ) {
+				$label = $text;
+			}
+		}
+
+		return sanitize_text_field( $label );
 	}
 
 	/**

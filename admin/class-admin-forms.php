@@ -120,8 +120,12 @@ class Art_Forms_Admin_Forms {
 		}
 
 		$settings_in = array(
-			'success_message' => isset( $_POST['success_message'] ) ? wp_unslash( (string) $_POST['success_message'] ) : '', // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			'actions'         => isset( $_POST['actions'] ) && is_array( $_POST['actions'] ) ? wp_unslash( $_POST['actions'] ) : array(), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			'success_message'   => isset( $_POST['success_message'] ) ? wp_unslash( (string) $_POST['success_message'] ) : '', // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			'submit_label'      => isset( $_POST['submit_label'] ) ? wp_unslash( (string) $_POST['submit_label'] ) : '', // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			'intro_title'       => isset( $_POST['intro_title'] ) ? wp_unslash( (string) $_POST['intro_title'] ) : '', // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			'intro_description' => isset( $_POST['intro_description'] ) ? wp_unslash( (string) $_POST['intro_description'] ) : '', // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			'style_brief'       => isset( $_POST['style_brief'] ) ? wp_unslash( (string) $_POST['style_brief'] ) : '', // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			'actions'           => isset( $_POST['actions'] ) && is_array( $_POST['actions'] ) ? wp_unslash( $_POST['actions'] ) : array(), // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		);
 
 		if ( $form_id > 0 ) {

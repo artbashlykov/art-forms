@@ -64,6 +64,23 @@ $export_url     = $form_id ? wp_nonce_url( admin_url( 'admin-post.php?action=art
 			<input type="text" class="art-forms-input art-forms-input-lg" id="form_title" name="form_title" value="<?php echo esc_attr( $title ); ?>" required placeholder="<?php echo esc_attr__( 'Например: Квиз на главной', 'art-forms' ); ?>" />
 		</section>
 
+		<section class="art-forms-panel">
+			<div class="art-forms-panel-head">
+				<div>
+					<h2><?php echo esc_html__( 'Заголовок и описание формы', 'art-forms' ); ?></h2>
+					<p class="art-forms-hint"><?php echo esc_html__( 'Можно оставить пустым', 'art-forms' ); ?></p>
+				</div>
+			</div>
+			<div class="art-forms-field-block">
+				<label class="art-forms-label" for="intro_title"><?php echo esc_html__( 'Заголовок', 'art-forms' ); ?></label>
+				<input type="text" class="art-forms-input" id="intro_title" name="intro_title" value="<?php echo esc_attr( isset( $settings['intro_title'] ) ? (string) $settings['intro_title'] : '' ); ?>" />
+			</div>
+			<div class="art-forms-field-block">
+				<label class="art-forms-label" for="intro_description"><?php echo esc_html__( 'Описание', 'art-forms' ); ?></label>
+				<textarea class="art-forms-input art-forms-textarea" rows="3" id="intro_description" name="intro_description"><?php echo esc_textarea( isset( $settings['intro_description'] ) ? (string) $settings['intro_description'] : '' ); ?></textarea>
+			</div>
+		</section>
+
 		<section class="art-forms-panel art-forms-builder-main">
 			<div class="art-forms-panel-head">
 				<div>
@@ -81,6 +98,19 @@ $export_url     = $form_id ? wp_nonce_url( admin_url( 'admin-post.php?action=art
 		<section class="art-forms-panel">
 			<div class="art-forms-panel-head">
 				<div>
+					<h2><?php echo esc_html__( 'Кнопка', 'art-forms' ); ?></h2>
+					<p class="art-forms-hint"><?php echo esc_html__( 'Текст на кнопке отправки. Попадает в код формы и промпт для Нейронки.', 'art-forms' ); ?></p>
+				</div>
+			</div>
+			<div class="art-forms-field-block">
+				<label class="art-forms-label" for="submit_label"><?php echo esc_html__( 'Текст кнопки', 'art-forms' ); ?></label>
+				<input type="text" class="art-forms-input" id="submit_label" name="submit_label" value="<?php echo esc_attr( isset( $settings['submit_label'] ) ? (string) $settings['submit_label'] : '' ); ?>" placeholder="<?php echo esc_attr__( 'Отправить', 'art-forms' ); ?>" />
+			</div>
+		</section>
+
+		<section class="art-forms-panel">
+			<div class="art-forms-panel-head">
+				<div>
 					<h2><?php echo esc_html__( 'Сообщение после отправки', 'art-forms' ); ?></h2>
 					<p class="art-forms-hint"><?php echo esc_html__( 'Текст, который пользователь видит на сайте сразу после успешной отправки.', 'art-forms' ); ?></p>
 				</div>
@@ -88,6 +118,19 @@ $export_url     = $form_id ? wp_nonce_url( admin_url( 'admin-post.php?action=art
 			<div class="art-forms-field-block">
 				<label class="art-forms-label screen-reader-text" for="success_message"><?php echo esc_html__( 'Сообщение после отправки', 'art-forms' ); ?></label>
 				<textarea class="art-forms-input art-forms-textarea" rows="3" id="success_message" name="success_message"><?php echo esc_textarea( $settings['success_message'] ); ?></textarea>
+			</div>
+		</section>
+
+		<section class="art-forms-panel">
+			<div class="art-forms-panel-head">
+				<div>
+					<h2><?php echo esc_html__( 'Цветовая схема и стили', 'art-forms' ); ?></h2>
+					<p class="art-forms-hint"><?php echo esc_html__( 'Опишите своими словами цвета, шрифты и настроение формы. Текст попадёт в промпт для Нейронки. Можно оставить пустым.', 'art-forms' ); ?></p>
+				</div>
+			</div>
+			<div class="art-forms-field-block">
+				<label class="art-forms-label screen-reader-text" for="style_brief"><?php echo esc_html__( 'Цветовая схема и стили', 'art-forms' ); ?></label>
+				<textarea class="art-forms-input art-forms-textarea" rows="6" id="style_brief" name="style_brief" placeholder="<?php echo esc_attr__( 'Например: тёмно-синий фон, белый текст, оранжевая кнопка, крупный заголовок, шрифт как на сайте.', 'art-forms' ); ?>"><?php echo esc_textarea( isset( $settings['style_brief'] ) ? (string) $settings['style_brief'] : '' ); ?></textarea>
 			</div>
 		</section>
 
