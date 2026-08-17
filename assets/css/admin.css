@@ -1926,6 +1926,11 @@ body.art-forms-crm-modal-open {
 	gap: 10px;
 }
 
+/* WP .button { display: inline-block } overrides the HTML hidden attribute. */
+.art-forms-crm-modal-actions [hidden] {
+	display: none !important;
+}
+
 .art-forms-crm-modal-body {
 	display: grid;
 	grid-template-columns: 1.4fr 1fr;

@@ -2,7 +2,7 @@
 /**
  * Plugin Name:       ART Forms
  * Description:       Создание логики форм (квизы, опросы), экспорт кода для дизайна, приём и сохранение ответов, отправка на email.
- * Version:           1.1.37
+ * Version:           1.1.38
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Арт Башлыков
@@ -16,7 +16,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'ART_FORMS_VERSION', '1.1.37' );
+define( 'ART_FORMS_VERSION', '1.1.38' );
 define( 'ART_FORMS_ADMIN_MENU_SLUG', 'art-forms' );
 define( 'ART_FORMS_AUTHOR_URL', 'https://forge.artbashlykov.ru' );
 define( 'ART_FORMS_PLUGIN_FILE', __FILE__ );
