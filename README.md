@@ -2,10 +2,10 @@
 
 WordPress-плагин для логики форм и квизов: схема полей в админке, экспорт кода/промпта для дизайна (ChatGPT), приём ответов, письма себе и клиенту, редирект и лог доставок.
 
-**Версия:** 1.1.32  
+**Версия:** 1.1.33  
 **Требования:** WordPress 6.0+, PHP 7.4+
 
-**Официальный репозиторий:** https://github.com/artbashlykov/art-forms
+**Официальный репозиторий:** https://github.com/artbashlykov/art-forms (публичный)
 
 **Больше материалов автора:** https://forge.artbashlykov.ru
 
@@ -26,6 +26,13 @@ WordPress-плагин для логики форм и квизов: схема 
 3. Активируйте плагин и откройте меню **ART Forms**.
 
 Либо через **ART Master Install**, если плагин добавлен в каталог.
+
+## Обновления
+
+- **GitHub** — на странице **Плагины**: «Проверить обновления» и стандартное обновление WordPress из [GitHub Releases](https://github.com/artbashlykov/art-forms/releases/latest) (`art-forms.zip`). Репозиторий публичный — токен не нужен.
+- **ART Master Install** — альтернативный канал: **Настройки → Плагины Арта**.
+
+Плагин использует [Plugin Update Checker](https://github.com/YahnisElsts/plugin-update-checker).
 
 ## Лицензия
 

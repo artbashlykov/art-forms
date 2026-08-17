@@ -67,6 +67,7 @@ class Art_Forms_Plugin {
 		require_once ART_FORMS_PLUGIN_DIR . 'includes/class-code-checker.php';
 		require_once ART_FORMS_PLUGIN_DIR . 'includes/class-csv-export.php';
 		require_once ART_FORMS_PLUGIN_DIR . 'includes/class-rest.php';
+		require_once ART_FORMS_PLUGIN_DIR . 'includes/class-updater.php';
 		require_once ART_FORMS_PLUGIN_DIR . 'public/class-public.php';
 
 		if ( is_admin() ) {
@@ -110,6 +111,7 @@ class Art_Forms_Plugin {
 
 		self::$admin_initialized = true;
 
+		Art_Forms_Updater::init();
 		Art_Forms_Admin_Forms::init();
 		Art_Forms_Admin_Submissions::init();
 		Art_Forms_Admin_Settings::init();
