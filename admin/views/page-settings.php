@@ -14,13 +14,13 @@ defined( 'ABSPATH' ) || exit;
 
 $tab  = isset( $tab ) ? (string) $tab : 'general';
 $tabs = isset( $tabs ) && is_array( $tabs ) ? $tabs : array(
-	'general'       => __( 'Основные', 'art-forms' ),
-	'integrations'  => __( 'Интеграции', 'art-forms' ),
+	'general' => __( 'Основные', 'art-forms' ),
 );
 ?>
 <div class="wrap art-forms-admin">
 	<h1><?php echo esc_html__( 'Настройки ART Forms', 'art-forms' ); ?></h1>
 
+	<?php if ( count( $tabs ) > 1 ) : ?>
 	<nav class="nav-tab-wrapper art-forms-settings-tabs" aria-label="<?php echo esc_attr__( 'Вкладки настроек', 'art-forms' ); ?>">
 		<?php foreach ( $tabs as $tab_id => $label ) : ?>
 			<?php
@@ -36,6 +36,7 @@ $tabs = isset( $tabs ) && is_array( $tabs ) ? $tabs : array(
 			<a href="<?php echo esc_url( $url ); ?>" class="<?php echo esc_attr( $class ); ?>"><?php echo esc_html( $label ); ?></a>
 		<?php endforeach; ?>
 	</nav>
+	<?php endif; ?>
 
 	<?php if ( $saved ) : ?>
 		<div class="notice notice-success is-dismissible"><p><?php echo esc_html__( 'Настройки сохранены.', 'art-forms' ); ?></p></div>

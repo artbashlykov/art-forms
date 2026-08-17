@@ -26,8 +26,7 @@ class Art_Forms_Admin_Settings {
 	 */
 	public static function get_tabs() {
 		return array(
-			'general'      => __( 'Основные', 'art-forms' ),
-			'integrations' => __( 'Интеграции', 'art-forms' ),
+			'general' => __( 'Основные', 'art-forms' ),
 		);
 	}
 
