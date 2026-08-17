@@ -175,9 +175,9 @@ class Art_Forms_Admin_Forms {
 			wp_die( esc_html__( 'Недостаточно прав.', 'art-forms' ) );
 		}
 
-		check_admin_referer( 'art_forms_duplicate_form' );
+		$form_id = isset( $_REQUEST['form_id'] ) ? absint( wp_unslash( $_REQUEST['form_id'] ) ) : 0;
+		check_admin_referer( 'art_forms_duplicate_form_' . $form_id );
 
-		$form_id = isset( $_GET['form_id'] ) ? absint( wp_unslash( $_GET['form_id'] ) ) : 0;
 		$source  = get_post( $form_id );
 		if ( ! $source || Art_Forms_Post_Types::POST_TYPE !== $source->post_type ) {
 			wp_die( esc_html__( 'Форма не найдена.', 'art-forms' ) );
@@ -221,9 +221,9 @@ class Art_Forms_Admin_Forms {
 			wp_die( esc_html__( 'Недостаточно прав.', 'art-forms' ) );
 		}
 
-		check_admin_referer( 'art_forms_delete_form' );
+		$form_id = isset( $_REQUEST['form_id'] ) ? absint( wp_unslash( $_REQUEST['form_id'] ) ) : 0;
+		check_admin_referer( 'art_forms_delete_form_' . $form_id );
 
-		$form_id = isset( $_GET['form_id'] ) ? absint( wp_unslash( $_GET['form_id'] ) ) : 0;
 		if ( $form_id > 0 ) {
 			wp_trash_post( $form_id );
 		}
@@ -240,9 +240,9 @@ class Art_Forms_Admin_Forms {
 			wp_die( esc_html__( 'Недостаточно прав.', 'art-forms' ) );
 		}
 
-		check_admin_referer( 'art_forms_export_form' );
+		$form_id = isset( $_REQUEST['form_id'] ) ? absint( wp_unslash( $_REQUEST['form_id'] ) ) : 0;
+		check_admin_referer( 'art_forms_export_form_' . $form_id );
 
-		$form_id = isset( $_GET['form_id'] ) ? absint( wp_unslash( $_GET['form_id'] ) ) : 0;
 		Art_Forms_Form_Pack::send_download( $form_id );
 	}
 
@@ -294,9 +294,9 @@ class Art_Forms_Admin_Forms {
 			wp_die( esc_html__( 'Недостаточно прав.', 'art-forms' ) );
 		}
 
-		check_admin_referer( 'art_forms_test_email' );
+		$form_id = isset( $_REQUEST['form_id'] ) ? absint( wp_unslash( $_REQUEST['form_id'] ) ) : 0;
+		check_admin_referer( 'art_forms_test_email_' . $form_id );
 
-		$form_id = isset( $_GET['form_id'] ) ? absint( wp_unslash( $_GET['form_id'] ) ) : 0;
 		if ( $form_id <= 0 ) {
 			wp_die( esc_html__( 'Форма не найдена.', 'art-forms' ) );
 		}

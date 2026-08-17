@@ -66,7 +66,6 @@ if ( ! empty( $tag_filter ) ) {
 }
 
 $csv_args = array(
-	'action'    => 'art_forms_export_csv',
 	'form_id'   => $form_id,
 	'date_from' => $date_from,
 	'date_to'   => $date_to,
@@ -84,10 +83,7 @@ if ( ! empty( $tag_filter ) ) {
 	$csv_args['tag'] = $tag_filter;
 }
 
-$csv_url = wp_nonce_url(
-	add_query_arg( $csv_args, admin_url( 'admin-post.php' ) ),
-	'art_forms_export_csv'
-);
+$csv_url = Art_Forms_Admin_Menu::nonce_admin_post_url( 'art_forms_export_csv', $csv_args );
 
 $stages_by_id = array();
 foreach ( $stages as $st ) {

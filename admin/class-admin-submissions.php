@@ -27,6 +27,7 @@ class Art_Forms_Admin_Submissions {
 			'art_forms_crm_toggle_star',
 			'art_forms_crm_add_comment',
 			'art_forms_crm_delete_comment',
+			'art_forms_crm_delete_submission',
 			'art_forms_crm_stage_save',
 			'art_forms_crm_stage_delete',
 			'art_forms_crm_stage_reorder',
@@ -88,6 +89,7 @@ class Art_Forms_Admin_Submissions {
 					'saved'           => __( 'Сохранено', 'art-forms' ),
 					'error'           => __( 'Ошибка', 'art-forms' ),
 					'confirmDelete'   => __( 'Удалить выбранные заявки безвозвратно?', 'art-forms' ),
+					'confirmDeleteOne'=> __( 'Удалить эту заявку безвозвратно?', 'art-forms' ),
 					'confirmStageDel' => __( 'Удалить этап? Заявки будут перенесены.', 'art-forms' ),
 					'commentEmpty'    => __( 'Введите комментарий', 'art-forms' ),
 					'noSelection'     => __( 'Выберите заявки', 'art-forms' ),
@@ -616,9 +618,10 @@ class Art_Forms_Admin_Submissions {
 			);
 		}
 
-		$delete_url = wp_nonce_url(
-			admin_url( 'admin-post.php?action=art_forms_delete_submission&id=' . $id ),
-			'art_forms_delete_submission'
+		$delete_url = Art_Forms_Admin_Menu::nonce_admin_post_url(
+			'art_forms_delete_submission',
+			array( 'id' => $id ),
+			'art_forms_delete_submission_' . $id
 		);
 
 		$profile_url = '';
@@ -1120,6 +1123,21 @@ class Art_Forms_Admin_Submissions {
 	}
 
 	/**
+	 * AJAX: delete one submission from the lead card.
+	 */
+	public static function ajax_delete_submission() {
+		self::ajax_guard();
+
+		$id = isset( $_POST['id'] ) ? absint( wp_unslash( $_POST['id'] ) ) : 0;
+		if ( $id <= 0 || ! Art_Forms_Submissions::get( $id ) ) {
+			wp_send_json_error( array( 'message' => __( 'Заявка не найдена.', 'art-forms' ) ), 404 );
+		}
+
+		Art_Forms_Submissions::delete( $id );
+		wp_send_json_success( array( 'id' => $id ) );
+	}
+
+	/**
 	 * Delete submission handler.
 	 */
 	public static function handle_delete() {
@@ -1127,9 +1145,9 @@ class Art_Forms_Admin_Submissions {
 			wp_die( esc_html__( 'Недостаточно прав.', 'art-forms' ) );
 		}
 
-		check_admin_referer( 'art_forms_delete_submission' );
+		$id = isset( $_REQUEST['id'] ) ? absint( wp_unslash( $_REQUEST['id'] ) ) : 0;
+		check_admin_referer( 'art_forms_delete_submission_' . $id );
 
-		$id      = isset( $_GET['id'] ) ? absint( wp_unslash( $_GET['id'] ) ) : 0;
 		$form_id = 0;
 		if ( $id > 0 ) {
 			$sub = Art_Forms_Submissions::get( $id );

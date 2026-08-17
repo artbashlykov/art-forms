@@ -32,17 +32,13 @@ $list_args = array(
 	'order'     => $order,
 );
 
-$csv_url = wp_nonce_url(
-	add_query_arg(
-		array(
-			'action'    => 'art_forms_export_csv',
-			'form_id'   => $form_id,
-			'date_from' => $date_from,
-			'date_to'   => $date_to,
-		),
-		admin_url( 'admin-post.php' )
-	),
-	'art_forms_export_csv'
+$csv_url = Art_Forms_Admin_Menu::nonce_admin_post_url(
+	'art_forms_export_csv',
+	array(
+		'form_id'   => $form_id,
+		'date_from' => $date_from,
+		'date_to'   => $date_to,
+	)
 );
 
 /**
@@ -140,9 +136,10 @@ $art_forms_sort_th = static function ( $column, $label, $current_orderby, $curre
 			<?php else : ?>
 				<?php foreach ( $items as $item ) : ?>
 					<?php
-					$delete_url = wp_nonce_url(
-						admin_url( 'admin-post.php?action=art_forms_delete_submission&id=' . (int) $item['id'] ),
-						'art_forms_delete_submission'
+					$delete_url = Art_Forms_Admin_Menu::nonce_admin_post_url(
+						'art_forms_delete_submission',
+						array( 'id' => (int) $item['id'] ),
+						'art_forms_delete_submission_' . (int) $item['id']
 					);
 					if ( ! empty( $item['form_title'] ) ) {
 						$form_title = (string) $item['form_title'];

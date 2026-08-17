@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
 $field_types    = Art_Forms_Schema::FIELD_TYPES;
 $just_saved     = ! empty( $just_saved );
 $import_notice  = isset( $import_notice ) && is_array( $import_notice ) ? $import_notice : null;
-$export_url     = $form_id ? wp_nonce_url( admin_url( 'admin-post.php?action=art_forms_export_form&form_id=' . $form_id ), 'art_forms_export_form' ) : '';
+$export_url     = $form_id ? Art_Forms_Admin_Menu::nonce_admin_post_url( 'art_forms_export_form', array( 'form_id' => $form_id ), 'art_forms_export_form_' . $form_id ) : '';
 ?>
 <div class="wrap art-forms-admin art-forms-edit">
 	<div class="art-forms-page-head">
@@ -233,7 +233,7 @@ $export_url     = $form_id ? wp_nonce_url( admin_url( 'admin-post.php?action=art
 					<button type="button" class="button button-primary" id="art-forms-run-checker" data-form-id="<?php echo esc_attr( (string) $form_id ); ?>" data-nonce="<?php echo esc_attr( wp_create_nonce( 'art_forms_check_code' ) ); ?>">
 						<?php echo esc_html__( 'Проверить код', 'art-forms' ); ?>
 					</button>
-					<a class="button" href="<?php echo esc_url( wp_nonce_url( admin_url( 'admin-post.php?action=art_forms_test_email&form_id=' . $form_id ), 'art_forms_test_email' ) ); ?>">
+					<a class="button" href="<?php echo esc_url( Art_Forms_Admin_Menu::nonce_admin_post_url( 'art_forms_test_email', array( 'form_id' => $form_id ), 'art_forms_test_email_' . $form_id ) ); ?>">
 						<?php echo esc_html__( 'Отправить тест на email', 'art-forms' ); ?>
 					</a>
 				</div>

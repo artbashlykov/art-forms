@@ -73,9 +73,9 @@ $import_notice = isset( $import_notice ) && is_array( $import_notice ) ? $import
 					$count  = count( Art_Forms_Schema::flatten_fields( $schema ) );
 					$edit  = admin_url( 'admin.php?page=art-forms-edit&form_id=' . $form->ID );
 					$stats = admin_url( 'admin.php?page=art-forms-submissions&form_id=' . $form->ID );
-					$dup    = wp_nonce_url( admin_url( 'admin-post.php?action=art_forms_duplicate_form&form_id=' . $form->ID ), 'art_forms_duplicate_form' );
-					$export = wp_nonce_url( admin_url( 'admin-post.php?action=art_forms_export_form&form_id=' . $form->ID ), 'art_forms_export_form' );
-					$del    = wp_nonce_url( admin_url( 'admin-post.php?action=art_forms_delete_form&form_id=' . $form->ID ), 'art_forms_delete_form' );
+					$dup    = Art_Forms_Admin_Menu::nonce_admin_post_url( 'art_forms_duplicate_form', array( 'form_id' => $form->ID ), 'art_forms_duplicate_form_' . $form->ID );
+					$export = Art_Forms_Admin_Menu::nonce_admin_post_url( 'art_forms_export_form', array( 'form_id' => $form->ID ), 'art_forms_export_form_' . $form->ID );
+					$del    = Art_Forms_Admin_Menu::nonce_admin_post_url( 'art_forms_delete_form', array( 'form_id' => $form->ID ), 'art_forms_delete_form_' . $form->ID );
 					?>
 					<tr>
 						<td><strong><a href="<?php echo esc_url( $edit ); ?>"><?php echo esc_html( get_the_title( $form ) ); ?></a></strong></td>

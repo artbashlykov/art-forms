@@ -373,4 +373,24 @@ class Art_Forms_Admin_Menu {
 			)
 		);
 	}
+
+	/**
+	 * admin-post.php URL with a nonce, without HTML entity encoding.
+	 * Safe for JSON and for a single esc_url() in HTML. Do not wrap in wp_nonce_url().
+	 *
+	 * @param string               $action       admin-post action.
+	 * @param array<string, mixed> $args         Extra query args (form_id, id, …).
+	 * @param string               $nonce_action Nonce action; defaults to $action.
+	 * @return string
+	 */
+	public static function nonce_admin_post_url( $action, array $args = array(), $nonce_action = '' ) {
+		unset( $args['action'], $args['_wpnonce'] );
+		$args['action'] = $action;
+		if ( '' === $nonce_action ) {
+			$nonce_action = $action;
+		}
+		$args['_wpnonce'] = wp_create_nonce( $nonce_action );
+
+		return add_query_arg( $args, admin_url( 'admin-post.php' ) );
+	}
 }

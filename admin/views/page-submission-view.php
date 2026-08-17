@@ -17,9 +17,10 @@ defined( 'ABSPATH' ) || exit;
 		<div class="notice notice-error"><p><?php echo esc_html__( 'Ответ не найден.', 'art-forms' ); ?></p></div>
 	<?php else : ?>
 		<?php
-		$delete_url = wp_nonce_url(
-			admin_url( 'admin-post.php?action=art_forms_delete_submission&id=' . (int) $submission['id'] ),
-			'art_forms_delete_submission'
+		$delete_url = Art_Forms_Admin_Menu::nonce_admin_post_url(
+			'art_forms_delete_submission',
+			array( 'id' => (int) $submission['id'] ),
+			'art_forms_delete_submission_' . (int) $submission['id']
 		);
 		?>
 		<p>

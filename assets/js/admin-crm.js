@@ -488,8 +488,19 @@
 
 		var del = document.getElementById('art-forms-crm-modal-delete');
 		del.href = data.delete_url || '#';
-		del.onclick = function () {
-			return window.confirm(str('confirmDelete'));
+		del.onclick = function (event) {
+			event.preventDefault();
+			if (!window.confirm(str('confirmDeleteOne', 'Удалить эту заявку безвозвратно?'))) {
+				return false;
+			}
+			post('art_forms_crm_delete_submission', { id: currentId }).then(function (res) {
+				if (res && res.success) {
+					window.location.reload();
+				} else {
+					alert((res && res.data && res.data.message) || str('error'));
+				}
+			});
+			return false;
 		};
 
 		setEditMode(false);
